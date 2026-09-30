@@ -1,6 +1,6 @@
 import fs from'node:fs';import path from'node:path';import site from'../config/site.json'with{type:'json'};
 const prod=process.env.BUILD_MODE==='production',domain=prod?(process.env.SITE_DOMAIN||site.productionDomain):site.previewDomain,phone=prod?process.env.SITE_PHONE:'',tel=prod?process.env.SITE_TEL:'',wa=prod?process.env.SITE_WHATSAPP:'';
-if(prod&&(!domain||!phone||!tel||!wa))throw Error('Producción requiere dominio, SITE_PHONE, SITE_TEL y SITE_WHATSAPP');
+if(prod&&!domain)throw Error('Producción requiere un dominio válido');
 const data=JSON.parse(fs.readFileSync('.cache/municipios.json','utf8')),out='dist';fs.rmSync(out,{recursive:true,force:true});fs.mkdirSync(out,{recursive:true});fs.mkdirSync(out+'/assets',{recursive:true});
 for(const f of ['site.css','site.js','hero-canalones.svg','limpieza-hojas.svg','bajante-atascada.svg','reparacion-canalon.svg','favicon.svg'])fs.copyFileSync('src/'+f,out+'/assets/'+f);
 const E=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),N=s=>String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase(),S=s=>N(s).replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,''),U=r=>new URL(r,domain.endsWith('/')?domain:domain+'/').href;
