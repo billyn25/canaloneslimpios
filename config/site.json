@@ -1,6 +1,6 @@
 {
-  "brand": "Canalones Limpios",
-  "tagline": "Limpieza de canalones en tu pueblo",
+  "brand": "Limpieza Canalones y Tejados",
+  "tagline": "Canalones · Tejados · Bajantes · Goteras",
   "previewDomain": "https://canaloneslimpios.netlify.app",
   "provinces": [
     {
@@ -53,5 +53,6 @@
       "name": "Ávila",
       "slug": "avila"
     }
-  ]
+  ],
+  "productionDomain": "https://limpiezacanalonesytejados.com"
 }
