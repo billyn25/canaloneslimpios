@@ -16,11 +16,8 @@ const image = (item, eager=false) => `<img src="${escape(remoteImage(item,eager?
 function directContact(ctx){
   const place=ctx.town?.name||'';
   const where=place?` en ${escape(place)}`:'';
-  const message='Hola, quiero pedir presupuesto para canalones o tejados'+(place?` en ${place}, ${ctx.province?.name||''}`:'')+'.';
-  const actions=[];
-  if(ctx.phone&&ctx.tel)actions.push(`<a class="btn" href="tel:${escape(ctx.tel)}">☎ ${escape(ctx.phone)}</a>`);
-  if(ctx.wa)actions.push(`<a class="btn light" href="https://wa.me/${escape(ctx.wa)}?text=${encodeURIComponent(message)}">WhatsApp</a>`);
-  return `<div class="contact-panel"><div><span class="eyebrow">Pide presupuesto</span><h2>Consulta canalones o tejados${where}</h2><p>Para orientarnos, indica el pueblo, el tipo de inmueble y qué observas: atasco, rebose, gotera, teja rota o problema de impermeabilización.</p></div><div class="contact-points"><span><b>1</b> Localidad</span><span><b>2</b> Tipo de inmueble</span><span><b>3</b> Problema observado</span></div>${actions.length?`<div class="actions">${actions.join('')}</div>`:''}</div>`;
+  const quickServices=['Limpieza de canalones','Canalón o bajante atascada','Gotera o filtración','Tejas rotas','Limpieza de tejado','Impermeabilización','Chimenea o remate','Otro problema'];
+  return `<div class="contact-panel wa-panel"><div class="contact-copy"><span class="eyebrow">Pide presupuesto</span><h2>Cuéntanos lo mínimo y abre WhatsApp${where}</h2><p>Tres datos rápidos. El mensaje se prepara automáticamente para que solo tengas que revisarlo y enviarlo.</p></div><form class="wa-mini" data-wa-mini data-whatsapp="${escape(ctx.wa||'')}" data-province="${escape(ctx.province?.name||'')}"><label><span>Pueblo</span><input name="localidad" value="${escape(place)}" required maxlength="140" autocomplete="address-level2" placeholder="Tu localidad"></label><label><span>Qué necesitas</span><select name="servicio" required><option value="">Selecciona</option>${quickServices.map(s=>`<option>${escape(s)}</option>`).join('')}</select></label><label><span>Tipo de inmueble</span><select name="inmueble" required><option value="">Selecciona</option><option>Vivienda unifamiliar</option><option>Casa de pueblo o caserío</option><option>Comunidad de propietarios</option><option>Local o pequeño edificio</option></select></label><button class="btn wa-submit" type="submit">Abrir WhatsApp</button></form>${ctx.phone&&ctx.tel?`<p class="contact-alt">¿Prefieres llamar? <a href="tel:${escape(ctx.tel)}"><strong>${escape(ctx.phone)}</strong></a></p>`:''}</div>`;
 }
 
 function budget(ctx){
