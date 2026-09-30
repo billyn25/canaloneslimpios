@@ -30,10 +30,10 @@ function gallery(){
   return `<section class="section visual-section" id="cubiertas"><div class="wrap roof-feature"><figure>${image(photo)}<figcaption>Fotografía de referencia · ${escape(photo.author)} / Pexels. No corresponde a un trabajo acreditado de Canalones Limpios.</figcaption></figure><div><span class="eyebrow">Del canalón al encuentro de cubierta</span><h2>No toda gotera se soluciona limpiando</h2><p>Por eso diferenciamos la evacuación del agua de las pequeñas reparaciones del tejado.</p><div class="roof-detail"><h3>Tejas rotas o desplazadas</h3><p>Se valora una sustitución puntual y el estado de las piezas contiguas. No se presupone una reforma completa.</p></div><div class="roof-detail"><h3>Chimeneas y remates</h3><p>La revisión se centra en el encuentro exterior con la cubierta y su impermeabilización. No incluye deshollinado ni mantenimiento de conductos de combustión.</p></div><div class="roof-detail"><h3>Limpieza adaptada al material</h3><p>El método se decide después de valorar la superficie y su conservación. No se promete usar agua a presión en todos los tejados.</p></div><a class="text-link" href="#contacto" data-service="Reparación de goteras">Preparar una consulta sobre goteras →</a></div></div></section>`;
 }
 function townFinder(){return `<div class="town-finder"><label for="town-search">Busca tu pueblo</label><input id="town-search" type="search" placeholder="Escribe al menos dos letras" autocomplete="off" data-town-search aria-describedby="town-search-help" aria-controls="town-search-results"><p id="town-search-help">Puedes buscar sin tildes. Los listados por provincia siguen disponibles debajo.</p><p data-town-status role="status"></p><div id="town-search-results" class="town-results"></div></div>`;}
-function priority(towns){
-  const preferred=['erandio','leioa','getxo','barakaldo','basauri','galdakao','derio','sondika','zamudio','loiu','mungia','sopela','berango','galdames','guenes','zalla','sopuerta','muskiz'];
+function bizkaiaHighlights(towns){
+  const preferred=['bilbao','erandio','leioa','getxo','barakaldo','basauri','galdakao','derio','sondika','zamudio','loiu','mungia','sopela','berango','guenes','zalla','sopuerta','muskiz'];
   const chosen=preferred.map(s=>towns.find(t=>t.provinceSlug==='bizkaia'&&t.slug===s)).filter(Boolean);
-  return `<section class="section wrap" id="entorno-bilbao"><span class="eyebrow">Bizkaia</span><h2>Bilbao y municipios del entorno</h2><p>Encuentra tu localidad y prepara la consulta con el pueblo ya indicado. El desplazamiento y la disponibilidad se confirman al contactar.</p><div class="home-town-links">${chosen.map(t=>`<a href="${escape(t.path)}">${escape(t.name)}</a>`).join('')}</div><p><a class="text-link" href="/bizkaia/">Consultar todos los municipios de Bizkaia →</a></p></section>`;
+  return `<div class="town-highlight"><div class="town-highlight-head"><div><span class="eyebrow">Bizkaia destacada</span><h3>Municipios cercanos a Bilbao</h3></div><a class="text-link" href="/bizkaia/">Ver todos los municipios →</a></div><div class="home-town-links">${chosen.map(t=>`<a href="${escape(t.path)}">${escape(t.name)}</a>`).join('')}</div></div>`;
 }
 
 export function refine(html,ctx){
@@ -68,8 +68,7 @@ export function refine(html,ctx){
     const galleryPattern=/<section class="section visual-section">[\s\S]*?<\/section>/;
     if(!galleryPattern.test(output))throw Error('No se encuentra la galería inicial');
     output=output.replace(galleryPattern,gallery());
-    output=output.replace('<div class="home-town-groups">',townFinder()+'<div class="home-town-groups">');
-    output=output.replace('<section class="section wrap" id="pueblos">',priority(ctx.towns)+'<section class="section wrap" id="pueblos">');
+    output=output.replace('<div class="home-town-groups">',bizkaiaHighlights(ctx.towns)+townFinder()+'<div class="home-town-groups">');
     output=output.replace('<section class="section wrap" id="contacto">',properties()+budget(ctx)+'<section class="section wrap" id="contacto">');
     output=output.replace(/(<div class="home-town-links">)([\s\S]*?)(<\/div>)/g,(_,a,links,b)=>a+links.replace(/>Limpieza de canalones en /g,'>')+b);
     output=output.replace('<h2>Canalones, bajantes y pequeñas reparaciones de tejado</h2>','<h2>Canalones, bajantes y pequeñas reparaciones de tejado</h2><nav class="service-jumps" aria-label="Ir a un servicio"><a href="#servicio-limpieza-de-canalones">Canalones</a><a href="#servicio-limpieza-de-tejados">Tejados</a><a href="#servicio-desatasco-de-bajantes">Bajantes</a><a href="#servicio-reparacion-de-goteras">Goteras</a><a href="#servicio-revision-de-chimeneas">Chimeneas</a></nav>');
