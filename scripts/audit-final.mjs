@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {getTowns,serviceNames,slug} from './refine.mjs';
 const root='dist',site=JSON.parse(fs.readFileSync('config/site.json','utf8')),data=JSON.parse(fs.readFileSync('.cache/municipios.json','utf8')),manifest=JSON.parse(fs.readFileSync(root+'/manifest.json','utf8'));
-const towns=getTowns(site,data),prod=process.env.BUILD_MODE==='production',domain=prod?process.env.SITE_DOMAIN:site.previewDomain,errors=[];
+const towns=getTowns(site,data),prod=process.env.BUILD_MODE==='production',domain=prod?(process.env.SITE_DOMAIN||site.productionDomain):site.previewDomain,errors=[];
 const expect=(condition,message)=>{if(!condition)errors.push(message)};
 const decode=s=>String(s).replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&');
 const routes=['/',...site.provinces.map(p=>`/${p.slug}/`),...towns.map(t=>t.path)];
@@ -31,10 +31,10 @@ for(const route of [...routes,'/404.html']){
   catch(error){errors.push(file+': JSON-LD inválido '+error.message)}
   for(const m of h.matchAll(/href="([^"]+)"/g)){const href=decode(m[1]);if(!href.startsWith('/')&&!href.startsWith('#'))continue;const url=new URL(href,canonical);if(url.origin!==new URL(domain).origin)continue;const target=fileFor(url.pathname);expect(fs.existsSync(path.join(root,target)),file+': enlace inexistente '+href);if(url.hash&&html.has(target))expect(html.get(target).includes(`id="${decodeURIComponent(url.hash.slice(1))}"`),file+': ancla inexistente '+href);links++;}
   for(const m of h.matchAll(/(?:src|href)="(\/assets\/[^"?#]+)/g))expect(fs.existsSync(path.join(root,m[1].slice(1))),file+': recurso ausente '+m[1]);
-  if(!is404){expect(h.includes('id="contacto"'),file+': contacto sin destino');expect(h.includes('class="contact-panel"'),file+': falta bloque de contacto profesional');contacts++}
-  expect(!/vista previa|pendiente de publicar|contacto comercial|servicio organizado por pueblos|preparar una consulta|consulta guiada/i.test(h),file+': conserva texto de maqueta o preview');
+  if(!is404){expect(h.includes('id="contacto"'),file+': contacto sin destino');expect(h.includes('class="contact-panel wa-panel"'),file+': falta bloque de contacto profesional');expect(h.includes('data-wa-mini'),file+': falta mini formulario WhatsApp');contacts++}
+  expect(!/vista previa|pendiente de publicar|contacto comercial|servicio organizado por pueblos|preparar una consulta|consulta guiada/i.test(h),file+': conserva texto de maqueta o preview');expect(!/Canalones Limpios/.test(h),file+': conserva marca antigua');
 }
-for(const town of towns){const h=html.get(fileFor(town.path))||'';for(const service of serviceNames)expect(h.includes(`id="servicio-${slug(service)}"`),town.path+': falta servicio '+service);expect(h.includes(`Consulta canalones o tejados en ${town.name}`),town.path+': contacto pierde localidad');}
+for(const town of towns){const h=html.get(fileFor(town.path))||'';for(const service of serviceNames)expect(h.includes(`id="servicio-${slug(service)}"`),town.path+': falta servicio '+service);expect(h.includes(`value="${town.name.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}"`),town.path+': mini WhatsApp pierde localidad');}
 const home=html.get('index.html')||'';expect(home.includes('<h1>Limpieza de canalones y tejados cerca de tu pueblo</h1>'),'H1 aprobado alterado');for(const id of ['pueblos','presupuesto','viviendas-comunidades','cubiertas','contacto'])expect(home.includes(`id="${id}"`),'Portada: falta '+id);expect(home.includes('★★★★★'),'Se han perdido las estrellas decorativas');expect(home.includes('data-town-search'),'Falta buscador de pueblos');
 const search=JSON.parse(fs.readFileSync(root+'/assets/towns.json','utf8'));expect(search.length===towns.length,'Buscador: inventario incompleto');expect(new Set(search.map(t=>t.path)).size===towns.length,'Buscador: rutas repetidas');
 if(prod){const children=walk(root+'/sitemaps').filter(f=>f.endsWith('.xml'));const sitemapUrls=children.flatMap(f=>[...fs.readFileSync(f,'utf8').matchAll(/<loc>([^<]+)<\/loc>/g)].map(m=>decode(m[1])));const expected=new Set(routes.map(r=>new URL(r,domain).href));expect(sitemapUrls.length===expected.size&&new Set(sitemapUrls).size===expected.size&&sitemapUrls.every(u=>expected.has(u)),'Sitemaps incompletos o con URLs ajenas');}
