@@ -36,3 +36,7 @@ html{scroll-padding-top:20px}body{padding-bottom:0}body:has(.mobilebar){padding-
 
 .urgent-local{background:#f4ece6}.urgent-local-grid{display:grid;grid-template-columns:1.25fr .75fr;gap:34px;align-items:center}.urgent-local h2{margin-top:6px}.urgent-local p{color:var(--muted);max-width:760px}.urgent-local-box{padding:24px;border-radius:14px;background:#fff;border:1px solid var(--line);box-shadow:0 10px 26px rgb(35 34 32 / 5%)}.urgent-local-box strong{font-size:18px}.urgent-local-box ul{padding-left:20px;color:var(--muted);line-height:1.7}.urgent-local-box .btn{display:inline-flex;margin-top:8px}
 @media(max-width:820px){.urgent-local-grid{grid-template-columns:1fr}}
+
+/* Mobile contact deduplication and WhatsApp visual identity */
+@media(max-width:820px){body:has(.mobilebar) .hero .actions{display:none}}
+.whatsapp-btn{background:#25d366!important;color:#fff!important}.whatsapp-btn:hover{background:#1ebe5d!important}.mobilebar a:last-child{background:#25d366!important}
