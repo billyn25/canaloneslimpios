@@ -1,6 +1,6 @@
 import {spawnSync} from 'node:child_process';
 const isolated=['deploy-preview','branch-deploy'].includes(process.env.CONTEXT);
-const production=!isolated&&(process.argv.includes('--production')||process.env.BUILD_MODE==='production');
+const production=!isolated&&(process.env.CONTEXT==='production'||process.argv.includes('--production')||process.env.BUILD_MODE==='production');
 const env={...process.env,BUILD_MODE:production?'production':'preview'};
 for(const script of ['fetch-municipalities.mjs','build.mjs','refine.mjs','audit.mjs','audit-final.mjs']){
   const run=spawnSync(process.execPath,['scripts/'+script],{stdio:'inherit',env});
