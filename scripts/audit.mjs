@@ -1,0 +1,13 @@
+import fs from'node:fs';import path from'node:path';import site from'../config/site.json'with{type:'json'};
+const prod=process.env.BUILD_MODE==='production',root='dist',errors=[],walk=d=>fs.readdirSync(d,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(path.join(d,e.name)):[path.join(d,e.name)]);
+if(!fs.existsSync(root))throw Error('AUDIT: falta dist');
+const manifest=JSON.parse(fs.readFileSync(root+'/manifest.json','utf8')),html=walk(root).filter(x=>x.endsWith('.html'));
+if(manifest.provinces!==7)errors.push('provincias != 7');
+if(manifest.towns!==1171)errors.push(`municipios ${manifest.towns}/1171`);
+if(manifest.urls!==1179)errors.push(`URLs ${manifest.urls}/1179`);
+if(html.length!==1180)errors.push(`HTML ${html.length}/1180 incluyendo 404`);
+const titles=new Set(),canon=new Set();
+for(const f of html){const rel=path.relative(root,f),h=fs.readFileSync(f,'utf8'),title=h.match(/<title>([^<]+)<\/title>/)?.[1],c=h.match(/<link rel="canonical" href="([^"]+)"/)?.[1],r=h.match(/<meta name="robots" content="([^"]+)"/)?.[1];if(!title)errors.push(rel+': sin title');else if(rel!=='404.html'&&titles.has(title))errors.push(rel+': title duplicado');else titles.add(title);if(!c)errors.push(rel+': sin canonical');else if(rel!=='404.html'&&canon.has(c))errors.push(rel+': canonical duplicado');else canon.add(c);if(prod&&rel!=='404.html'&&r!=='index,follow')errors.push(rel+': no indexable');if(!prod&&r!=='noindex,nofollow')errors.push(rel+': preview indexable');if(/antenas|antenista|rapid|zalla|641\s*589\s*394|670\s*042\s*626/i.test(h))errors.push(rel+': resto de proyecto de antenas');if(/trabajos realizados|clientes de .* nos recomiendan|llegamos en \d+|calle [A-ZÁÉÍÓÚÑ]/i.test(h))errors.push(rel+': afirmación local no verificada');if(rel!=='index.html'&&rel!=='404.html'&&!/<h1>[^<]*(?:canalones|Canalones)[^<]*<\/h1>/.test(h))errors.push(rel+': H1 local débil')}
+if(prod){if(!fs.existsSync(root+'/sitemap.xml'))errors.push('sin sitemap.xml');if(!fs.existsSync(root+'/robots.txt'))errors.push('sin robots.txt');const robots=fs.readFileSync(root+'/robots.txt','utf8');if(!/Allow:\s*\//.test(robots)||/Disallow:\s*\//.test(robots))errors.push('robots producción incorrecto');for(const p of site.provinces)if(!fs.existsSync(root+'/sitemaps/sitemap-'+p.slug+'.xml'))errors.push('falta sitemap '+p.slug)}
+if(errors.length){console.error('AUDIT FALLIDO',errors.length);for(const e of errors.slice(0,100))console.error('-',e);process.exit(2)}
+console.log(`AUDIT OK: ${manifest.towns} municipios, ${manifest.provinces} provincias, ${manifest.urls} URLs; sin restos de proyectos de antenas ni afirmaciones locales inventadas.`);
