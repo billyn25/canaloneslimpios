@@ -1,14 +1,52 @@
 {
-  "brand":"Canalones Limpios",
-  "tagline":"Limpieza de canalones en tu pueblo",
-  "previewDomain":"https://canaloneslimpios.netlify.app",
-  "provinces":[
-    {"id":"48","name":"Bizkaia","slug":"bizkaia"},
-    {"id":"20","name":"Gipuzkoa","slug":"gipuzkoa"},
-    {"id":"01","name":"Álava","slug":"alava"},
-    {"id":"39","name":"Cantabria","slug":"cantabria"},
-    {"id":"09","name":"Burgos","slug":"burgos"},
-    {"id":"31","name":"Navarra","slug":"navarra"},
-    {"id":"26","name":"La Rioja","slug":"la-rioja"}
+  "brand": "Canalones Limpios",
+  "tagline": "Limpieza de canalones en tu pueblo",
+  "previewDomain": "https://canaloneslimpios.netlify.app",
+  "provinces": [
+    {
+      "id": "48",
+      "name": "Bizkaia",
+      "slug": "bizkaia"
+    },
+    {
+      "id": "20",
+      "name": "Gipuzkoa",
+      "slug": "gipuzkoa"
+    },
+    {
+      "id": "01",
+      "name": "Álava",
+      "slug": "alava"
+    },
+    {
+      "id": "39",
+      "name": "Cantabria",
+      "slug": "cantabria"
+    },
+    {
+      "id": "09",
+      "name": "Burgos",
+      "slug": "burgos"
+    },
+    {
+      "id": "31",
+      "name": "Navarra",
+      "slug": "navarra"
+    },
+    {
+      "id": "26",
+      "name": "La Rioja",
+      "slug": "la-rioja"
+    },
+    {
+      "id": "33",
+      "name": "Asturias",
+      "slug": "asturias"
+    },
+    {
+      "id": "34",
+      "name": "Palencia",
+      "slug": "palencia"
+    }
   ]
 }
