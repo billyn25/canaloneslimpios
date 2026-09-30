@@ -18,3 +18,5 @@ test('no aplica dos veces ni acepta galería de estructura desconocida',()=>{con
 test('no aparecen mensajes de preview o maqueta en la portada',()=>{const h=refine(page('Limpieza de canalones y tejados cerca de tu pueblo'),context);assert.ok(!/vista previa|pendiente de publicar|contacto comercial|servicio organizado por pueblos|preparar una consulta|consulta guiada/i.test(h))});
 
 test('páginas legales no reciben bloques comerciales',()=>{for(const route of ['/aviso-legal/','/privacidad/','/cookies/']){const h=refine(page('Información legal'),{...context,route});assert.ok(!h.includes('data-wa-mini'));assert.ok(!graph(h).some(x=>x['@type']==='Service'))}});
+
+test('service hubs mantienen breadcrumbs simples y sin provincia',()=>{const h=refine(page('Limpieza de canalones'),{...context,route:'/limpieza-canalones/'});const crumb=graph(h).find(x=>x['@type']==='BreadcrumbList');assert.deepEqual(crumb.itemListElement.map(x=>x.item),['https://preview.example.invalid/','https://preview.example.invalid/limpieza-canalones/'])});
