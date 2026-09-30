@@ -92,7 +92,7 @@ export function refine(html,ctx){
 export function getTowns(site,data){return site.provinces.flatMap(p=>(data.groups[p.slug]||[]).map(t=>({...t,slug:slug(t.name),province:p.name,provinceSlug:p.slug,path:`/${p.slug}/${slug(t.name)}/`})))}
 async function main(){
   const root='dist',site=JSON.parse(fs.readFileSync('config/site.json','utf8')),data=JSON.parse(fs.readFileSync('.cache/municipios.json','utf8')),manifest=JSON.parse(fs.readFileSync(root+'/manifest.json','utf8'));
-  const towns=getTowns(site,data),prod=manifest.mode==='production',domain=prod?(process.env.SITE_DOMAIN||site.productionDomain):site.previewDomain,phone=prod?process.env.SITE_PHONE:'',tel=prod?process.env.SITE_TEL:'',wa=prod?process.env.SITE_WHATSAPP:'';
+  const towns=getTowns(site,data),prod=manifest.mode==='production',domain=prod?(process.env.SITE_DOMAIN||site.productionDomain):site.previewDomain,phone=prod?(process.env.SITE_PHONE||site.phone||''):'',tel=prod?(process.env.SITE_TEL||site.tel||''):'',wa=prod?(process.env.SITE_WHATSAPP||site.whatsapp||''):'';
   if(!/^https?:\/\//.test(domain||''))throw Error('Dominio de generación inválido');
   for(const file of ['refinement.css','site.js'])fs.copyFileSync('src/'+file,root+'/assets/'+file);
   const walk=d=>fs.readdirSync(d,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(path.join(d,e.name)):[path.join(d,e.name)]);
