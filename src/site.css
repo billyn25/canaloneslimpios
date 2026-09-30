@@ -9,3 +9,6 @@
 
 .home-town-groups{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:26px}.town-province{padding:22px;border:1px solid var(--line);border-radius:16px;background:#fff;box-shadow:0 9px 24px rgba(35,34,32,.05)}.town-province-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:14px}.town-province-head h3{margin:0;font-size:21px;color:var(--roof)}.town-province-head a{font-size:12px;font-weight:900;color:var(--copper-dark)}.home-town-links{display:flex;flex-wrap:wrap;gap:8px}.home-town-links a{padding:8px 10px;border-radius:999px;background:var(--soft);border:1px solid var(--line);font-size:12px;font-weight:800;color:var(--roof)}.home-town-links a:hover{background:#efe5dc;text-decoration:none}
 @media(max-width:700px){.home-town-groups{grid-template-columns:1fr}}
+
+.whatsapp-btn{background:#25d366!important;color:#fff!important;box-shadow:0 8px 20px rgba(37,211,102,.20)}.whatsapp-btn:hover{background:#1ebe5d!important;text-decoration:none}.mobilebar a:last-child{background:#25d366!important}
+@media(max-width:820px){body:has(.mobilebar) .hero .actions{display:none}}
