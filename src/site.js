@@ -7,19 +7,22 @@ document.addEventListener('click',event=>{
   let target;try{target=document.getElementById(decodeURIComponent(href.slice(1)))}catch{return}
   if(target){event.preventDefault();target.scrollIntoView({behavior:motion(),block:'start'});}
 });
-for(const form of document.querySelectorAll('[data-enquiry]')){
-  const initialTown=form.elements.localidad.value;
+
+for(const form of document.querySelectorAll('[data-wa-mini]')){
   form.addEventListener('submit',event=>{
     event.preventDefault();if(!form.reportValidity())return;
-    const fields=new FormData(form);const town=String(fields.get('localidad')||'').trim();
-    const province=town===initialTown?form.dataset.province:'';
-    const message=['Hola, quiero consultar con Canalones Limpios.',`Localidad: ${town}${province?', '+province:''}`,`Inmueble: ${fields.get('inmueble')}`,`Servicio: ${fields.get('servicio')}`,`Altura aproximada: ${fields.get('altura')}`,`Problema: ${String(fields.get('problema')||'').trim()||'Por explicar'}`].join('\n');
-    const result=form.querySelector('.quote-result');result.hidden=false;result.querySelector('textarea').value=message;
-    const status=result.querySelector('[role="status"]');const number=form.dataset.whatsapp||'';
-    if(/^\d{8,15}$/.test(number)){status.textContent='Se abrirá WhatsApp. Revisa el texto antes de enviarlo.';window.location.assign(`https://wa.me/${number}?text=${encodeURIComponent(message)}`)}
-    else{status.textContent='Consulta preparada. Vista previa: no se ha enviado ningún mensaje. Puedes seleccionar y copiar el resumen.';result.scrollIntoView({behavior:motion(),block:'nearest'});}
+    const data=new FormData(form);
+    const town=String(data.get('localidad')||'').trim();
+    const province=form.dataset.province||'';
+    const service=String(data.get('servicio')||'').trim();
+    const property=String(data.get('inmueble')||'').trim();
+    const message=['Hola, quiero pedir presupuesto en Limpieza Canalones y Tejados.',`Localidad: ${town}${province?', '+province:''}`,`Servicio: ${service}`,`Inmueble: ${property}`].join('\n');
+    const number=String(form.dataset.whatsapp||'').replace(/\D/g,'');
+    const url=number?`https://wa.me/${number}?text=${encodeURIComponent(message)}`:`https://wa.me/?text=${encodeURIComponent(message)}`;
+    window.location.assign(url);
   });
 }
+
 const finder=document.querySelector('[data-town-search]');
 if(finder){
   const results=document.getElementById('town-search-results'),status=document.querySelector('[data-town-status]');let timer,sequence=0,cached;
