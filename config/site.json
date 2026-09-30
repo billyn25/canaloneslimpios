@@ -47,6 +47,11 @@
       "id": "34",
       "name": "Palencia",
       "slug": "palencia"
+    },
+    {
+      "id": "05",
+      "name": "Ávila",
+      "slug": "avila"
     }
   ]
 }
