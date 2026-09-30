@@ -1,8 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
-<title>Canalones Limpios</title>
-<rect width="128" height="128" rx="24" fill="#2f3133"/>
-<path d="M19 61 55 37l33 24" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
-<path d="M24 65h69" fill="none" stroke="#d77b49" stroke-width="11" stroke-linecap="round"/>
-<path d="M89 65v28c0 10 8 18 18 18" fill="none" stroke="#d77b49" stroke-width="11" stroke-linecap="round"/>
-<path d="M101 20c-7 10-11 16-11 23a12 12 0 0 0 24 0c0-7-4-13-13-23Z" fill="none" stroke="#fff" stroke-width="6"/>
+<title>Limpieza Canalones y Tejados</title>
+<rect width="128" height="128" rx="28" fill="#2f3133"/>
+<circle cx="64" cy="64" r="42" fill="#9f4b24"/>
+<text x="64" y="76" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="42" font-weight="900" fill="#fff">CT</text>
 </svg>
