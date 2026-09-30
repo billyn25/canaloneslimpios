@@ -36,11 +36,16 @@ function gallery(){
   return `<section class="section visual-section" id="cubiertas"><div class="wrap roof-feature"><figure>${image(photo)}<figcaption>Fotografía de referencia · ${escape(photo.author)} / Pexels.</figcaption></figure><div><span class="eyebrow">Del canalón al encuentro de cubierta</span><h2>No toda gotera se soluciona limpiando</h2><p>Por eso diferenciamos la evacuación del agua de las pequeñas reparaciones del tejado.</p><div class="roof-detail"><h3>Tejas rotas o desplazadas</h3><p>Se valora una sustitución puntual y el estado de las piezas contiguas. No se presupone una reforma completa.</p></div><div class="roof-detail"><h3>Chimeneas y remates</h3><p>La revisión se centra en el encuentro exterior con la cubierta y su impermeabilización. No incluye deshollinado ni mantenimiento de conductos de combustión.</p></div><div class="roof-detail"><h3>Limpieza adaptada al material</h3><p>El método se decide después de valorar la superficie y su conservación. No se promete usar agua a presión en todos los tejados.</p></div><a class="text-link" href="#contacto">Consultar goteras →</a></div></div></section>`;
 }
 function townFinder(){return `<div class="town-finder"><label for="town-search">Busca tu pueblo</label><input id="town-search" type="search" placeholder="Escribe al menos dos letras" autocomplete="off" data-town-search aria-describedby="town-search-help" aria-controls="town-search-results"><p id="town-search-help">Puedes buscar sin tildes. Los listados por provincia siguen disponibles debajo.</p><p data-town-status role="status"></p><div id="town-search-results" class="town-results"></div></div>`;}
+function finalSummary(ctx){
+  const towns=ctx.towns.length,provinces=ctx.provinces.length,services=serviceNames.length;
+  const provinceLinks=ctx.provinces.map(p=>`<a href="/${p.slug}/">${escape(p.name)}</a>`).join('');
+  return `<section class="final-summary" id="resumen"><div class="wrap"><div class="summary-head"><span class="eyebrow">Cobertura y servicios</span><h2>Un servicio pensado para pueblos, viviendas y comunidades</h2><p>Busca tu localidad, elige el problema y abre WhatsApp con el aviso preparado.</p></div><div class="summary-stats"><article><strong>${towns.toLocaleString('es-ES')}</strong><span>municipios</span><small>Páginas locales enlazadas por provincia</small></article><article><strong>${provinces}</strong><span>provincias</span><small>Cobertura organizada y navegable</small></article><article><strong>${services}</strong><span>servicios</span><small>Canalones, tejados, goteras y más</small></article><article class="urgent-card"><span class="urgent-dot" aria-hidden="true"></span><strong>24 h</strong><span>urgencias</span><small>Goteras, reboses y avisos urgentes de cubierta</small><a href="#contacto">Consultar urgencia →</a></article></div><div class="summary-provinces">${provinceLinks}</div></div></section>`;
+}
 
 
 export function refine(html,ctx){
   if(html.includes('data-refined="1"'))throw Error('La fase de presentación ya se ha aplicado');
-  const isHome=ctx.route==='/',is404=ctx.route==='/404.html';
+  const isHome=ctx.route==='/',is404=ctx.route==='/404.html',isLegal=['/aviso-legal/','/privacidad/','/cookies/'].includes(ctx.route);
   let output=html.replace('<html lang="es">','<html lang="es" data-refined="1">').replaceAll('\\n<section','\n<section');
   output=output.replace('</head>','<link rel="stylesheet" href="/assets/refinement.css"></head>');
   output=output.replace('<body>','<body><a class="skip-link" href="#contenido">Saltar al contenido</a>').replace('<main','<main id="contenido"');
@@ -56,9 +61,9 @@ export function refine(html,ctx){
   const organization={'@type':'Organization','@id':new URL('/#organizacion',ctx.domain).href,name:'Limpieza Canalones y Tejados',url:new URL('/',ctx.domain).href};
   const graph=[organization,{'@type':'WebSite','@id':new URL('/#web',ctx.domain).href,url:new URL('/',ctx.domain).href,name:'Limpieza Canalones y Tejados',inLanguage:'es'},{'@type':ctx.province&&!ctx.town?'CollectionPage':'WebPage','@id':canonical+'#pagina',url:canonical,name:title,description,inLanguage:'es',isPartOf:{'@id':new URL('/#web',ctx.domain).href}}];
   if(!isHome&&!is404){const parts=[{name:'Inicio',item:new URL('/',ctx.domain).href},{name:ctx.province.name,item:new URL('/'+ctx.province.slug+'/',ctx.domain).href}];if(ctx.town)parts.push({name:ctx.town.name,item:canonical});graph.push({'@type':'BreadcrumbList',itemListElement:parts.map((x,i)=>({'@type':'ListItem',position:i+1,...x}))});}
-  if(!is404)graph.push({'@type':'Service',name:'Limpieza de canalones y mantenimiento de tejados',serviceType:serviceNames,provider:{'@id':organization['@id']},areaServed:ctx.province?{'@type':ctx.town?'Place':'AdministrativeArea',name:ctx.town?`${ctx.town.name}, ${ctx.province.name}`:ctx.province.name}:ctx.provinces.map(p=>({'@type':'AdministrativeArea',name:p.name}))});
+  if(!is404&&!isLegal)graph.push({'@type':'Service',name:'Limpieza de canalones y mantenimiento de tejados',serviceType:serviceNames,provider:{'@id':organization['@id']},areaServed:ctx.province?{'@type':ctx.town?'Place':'AdministrativeArea',name:ctx.town?`${ctx.town.name}, ${ctx.province.name}`:ctx.province.name}:ctx.provinces.map(p=>({'@type':'AdministrativeArea',name:p.name}))});
   output=output.replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/,`<script type="application/ld+json">${JSON.stringify({'@context':'https://schema.org','@graph':graph}).replaceAll('<','\\u003c')}</script>`);
-  if(is404)return output;
+  if(is404||isLegal)return output;
   output=output.replace(/<article class="card"><b>([^<]+)<\/b><p>([\s\S]*?)<\/p><\/article>/g,(_,name,text)=>`<article class="card" id="servicio-${slug(decode(name))}"><h3>${name}</h3><p>${text}</p><a class="service-link" href="#contacto">Consultar este servicio →</a></article>`);
   if(!output.includes('id="servicio-limpieza-de-tejados"')&&output.includes('<div class="services">'))output=output.replace('<div class="services">','<div class="services"><article class="card" id="servicio-limpieza-de-tejados"><h3>Limpieza de tejados</h3><p>Valoración de la suciedad y del método de limpieza adecuado a la cubierta, sin dar por válida la misma técnica para cualquier material.</p><a class="service-link" href="#contacto">Consultar este servicio →</a></article>');
   const contactSection=/<section class="section wrap" id="contacto">[\s\S]*?<\/section>/;
@@ -70,7 +75,7 @@ export function refine(html,ctx){
     if(!galleryPattern.test(output))throw Error('No se encuentra la galería inicial');
     output=output.replace(galleryPattern,gallery());
     output=output.replace('<div class="home-town-groups">',townFinder()+'<div class="home-town-groups">');
-    output=output.replace('<section class="section wrap" id="contacto">',properties()+includedWork()+budget(ctx)+'<section class="section wrap" id="contacto">');
+    output=output.replace('<section class="section wrap" id="contacto">',properties()+includedWork()+budget(ctx)+finalSummary(ctx)+'<section class="section wrap" id="contacto">');
     output=output.replace(/(<div class="home-town-links">)([\s\S]*?)(<\/div>)/g,(_,a,links,b)=>a+links.replace(/>Limpieza de canalones en /g,'>')+b);
     output=output.replace('<h2>Canalones, bajantes y pequeñas reparaciones de tejado</h2>','<h2>Canalones, bajantes y pequeñas reparaciones de tejado</h2><nav class="service-jumps" aria-label="Ir a un servicio"><a href="#servicio-limpieza-de-canalones">Canalones</a><a href="#servicio-limpieza-de-tejados">Tejados</a><a href="#servicio-desatasco-de-bajantes">Bajantes</a><a href="#servicio-reparacion-de-goteras">Goteras</a><a href="#servicio-revision-de-chimeneas">Chimeneas</a></nav>');
   }else if(ctx.town)output=output.replace('<section class="section wrap" id="contacto">',includedWork()+budget(ctx)+'<section class="section wrap" id="contacto">');
@@ -93,6 +98,6 @@ async function main(){
   fs.writeFileSync(root+'/robots.txt',prod?`User-agent: *\nAllow: /\n\nSitemap: ${new URL('/sitemap.xml',domain).href}\n`:'User-agent: *\nAllow: /\n');
   fs.writeFileSync(root+'/_headers',(prod?'/404.html\n  X-Robots-Tag: noindex, nofollow\n':'/*\n  X-Robots-Tag: noindex, nofollow\n'));
   fs.writeFileSync(root+'/presentation-manifest.json',JSON.stringify({pages:count,searchableTowns:towns.length,media:media.map(x=>({id:x.id,source:x.source,delivery:'external CDN'})),production:prod},null,2));
-  console.log(`PRESENTACIÓN OK: ${count} HTML; buscador con ${towns.length} municipios; contacto guiado, presupuesto, fotografías y breadcrumbs. Fotos: CDN externo de Pexels.`);
+  console.log(`PRESENTACIÓN OK: ${count} HTML; buscador con ${towns.length} municipios; mini WhatsApp, resumen final, legales, fotografías y breadcrumbs.`);
 }
 if(process.argv[1]&&import.meta.url===pathToFileURL(path.resolve(process.argv[1])).href)main().catch(error=>{console.error(error);process.exitCode=1});
