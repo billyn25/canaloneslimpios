@@ -57,7 +57,25 @@
       "id": "24",
       "name": "León",
       "slug": "leon"
+    },
+    {
+      "id": "49",
+      "name": "Zamora",
+      "slug": "zamora"
+    },
+    {
+      "id": "47",
+      "name": "Valladolid",
+      "slug": "valladolid"
+    },
+    {
+      "id": "40",
+      "name": "Segovia",
+      "slug": "segovia"
     }
   ],
-  "productionDomain": "https://limpiezacanalonesytejados.com"
+  "productionDomain": "https://limpiezacanalonesytejados.com",
+  "phone": "641 58 93 94",
+  "tel": "+34641589394",
+  "whatsapp": "34641589394"
 }
