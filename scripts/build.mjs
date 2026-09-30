@@ -64,7 +64,7 @@ const featuredTownNames={
 const townLinks=(p,a)=>{
   const preferred=(featuredTownNames[p.slug]||[]).map(N),used=new Set(),visible=[];
   for(const wanted of preferred){const found=a.find(x=>N(x.name)===wanted);if(found&&!used.has(found.name)){visible.push(found);used.add(found.name)}}
-  for(const x of a){if(visible.length>=8)break;if(!used.has(x.name)){visible.push(x);used.add(x.name)}}
+  for(const x of a){if(visible.length>=12)break;if(!used.has(x.name)){visible.push(x);used.add(x.name)}}
   const rest=a.filter(x=>!used.has(x.name));
   const link=x=>`<a href="/${p.slug}/${S(x.name)}/">${E(x.name)}</a>`;
   return `<div class="home-town-links featured-town-links">${visible.map(link).join('')}</div>${rest.length?`<details class="more-towns"><summary>Ver más pueblos de ${E(p.name)} <span>(${rest.length})</span></summary><div class="home-town-links more-town-links">${rest.map(link).join('')}</div></details>`:''}`;
