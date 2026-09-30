@@ -2,7 +2,6 @@ const normalize=value=>String(value).normalize('NFD').replace(/[\u0300-\u036f]/g
 const motion=()=>window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth';
 document.addEventListener('click',event=>{
   const anchor=event.target.closest('a');if(!anchor)return;
-  if(anchor.dataset.service){const select=document.querySelector('[data-enquiry] select[name="servicio"]');if(select)select.value=anchor.dataset.service;}
   const href=anchor.getAttribute('href')||'';
   if(!href.startsWith('#')||href.length<2)return;
   let target;try{target=document.getElementById(decodeURIComponent(href.slice(1)))}catch{return}
