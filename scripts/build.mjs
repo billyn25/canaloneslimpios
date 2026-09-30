@@ -45,7 +45,31 @@ const cookieUi=()=>`<div class="cookie-banner" data-cookie-banner hidden><div><s
 const legalPage=(slug,title,body)=>`${head(`${title} | Limpieza Canalones y Tejados`,title,`/${slug}/`,'España')}<body>${header()}<main><div class="wrap crumbs"><a href="/">Inicio</a> → ${E(title)}</div><section class="section wrap legal-page"><span class="eyebrow">Información legal</span><h1>${E(title)}</h1>${body}</section></main>${footer()}</body></html>`;
 
 const write=(route,html)=>{const d=route==='/'?out:path.join(out,route.replace(/^\//,'').replace(/\/$/,''));fs.mkdirSync(d,{recursive:true});fs.writeFileSync(path.join(d,'index.html'),html)};
-function home(){const title='Limpieza de canalones y tejados | Urgencias 24 h',desc='Limpieza y reparación de canalones y tejados, bajantes, goteras, impermeabilización y urgencias 24 h. Servicio organizado por provincias y pueblos.',provs=site.provinces.map(p=>`<a class="province" href="/${p.slug}/"><strong>${E(p.name)}</strong><span>${data.groups[p.slug].length} municipios</span></a>`).join(''),featured=site.provinces.map(p=>{const a=data.groups[p.slug],take=Math.min(14,a.length),picked=Array.from({length:take},(_,i)=>a[Math.floor(i*(a.length-1)/Math.max(1,take-1))]);return`<article class="town-province"><div class="town-province-head"><h3>${E(p.name)}</h3><a href="/${p.slug}/">Ver todos</a></div><div class="home-town-links">${picked.map(x=>`<a href="/${p.slug}/${S(x.name)}/">Limpieza de canalones en ${E(x.name)}</a>`).join('')}</div></article>`}).join('');return`${head(title,desc,'/','España')}<body>${header()}<main>
+const featuredTownNames={
+  bizkaia:['Bilbao','Getxo','Barakaldo','Portugalete','Durango','Gernika-Lumo','Basauri','Leioa'],
+  gipuzkoa:['Donostia/San Sebastián','Irun','Eibar','Zarautz','Tolosa','Hondarribia','Errenteria','Beasain'],
+  alava:['Vitoria-Gasteiz','Laudio/Llodio','Amurrio','Laguardia','Agurain/Salvatierra','Alegría-Dulantzi'],
+  cantabria:['Santander','Torrelavega','Castro-Urdiales','Laredo','Santoña','Reinosa','Camargo','Piélagos'],
+  burgos:['Burgos','Aranda de Duero','Miranda de Ebro','Lerma','Briviesca','Medina de Pomar','Villarcayo de Merindad de Castilla la Vieja'],
+  navarra:['Pamplona/Iruña','Tudela','Estella-Lizarra','Tafalla','Burlada/Burlata','Corella','Altsasu/Alsasua'],
+  'la-rioja':['Logroño','Calahorra','Haro','Arnedo','Nájera','Santo Domingo de la Calzada','Alfaro'],
+  asturias:['Oviedo','Gijón','Avilés','Langreo','Mieres','Llanes','Cangas de Onís','Villaviciosa'],
+  palencia:['Palencia','Aguilar de Campoo','Guardo','Venta de Baños','Carrión de los Condes','Cervera de Pisuerga'],
+  avila:['Ávila','Arévalo','Arenas de San Pedro','Cebreros','Las Navas del Marqués','El Tiemblo'],
+  leon:['León','Ponferrada','Astorga','La Bañeza','Villablino','Valencia de Don Juan','Bembibre'],
+  zamora:['Zamora','Benavente','Toro','Puebla de Sanabria','Fermoselle','Fuentesaúco'],
+  valladolid:['Valladolid','Medina del Campo','Tordesillas','Laguna de Duero','Íscar','Peñafiel'],
+  segovia:['Segovia','El Espinar','San Ildefonso','Cuéllar','Sepúlveda','Cantalejo']
+};
+const townLinks=(p,a)=>{
+  const preferred=(featuredTownNames[p.slug]||[]).map(N),used=new Set(),visible=[];
+  for(const wanted of preferred){const found=a.find(x=>N(x.name)===wanted);if(found&&!used.has(found.name)){visible.push(found);used.add(found.name)}}
+  for(const x of a){if(visible.length>=8)break;if(!used.has(x.name)){visible.push(x);used.add(x.name)}}
+  const rest=a.filter(x=>!used.has(x.name));
+  const link=x=>`<a href="/${p.slug}/${S(x.name)}/">${E(x.name)}</a>`;
+  return `<div class="home-town-links featured-town-links">${visible.map(link).join('')}</div>${rest.length?`<details class="more-towns"><summary>Ver más pueblos de ${E(p.name)} <span>(${rest.length})</span></summary><div class="home-town-links more-town-links">${rest.map(link).join('')}</div></details>`:''}`;
+};
+function home(){const title='Limpieza de canalones y tejados | Urgencias 24 h',desc='Limpieza y reparación de canalones y tejados, bajantes, goteras, impermeabilización y urgencias 24 h. Servicio organizado por provincias y pueblos.',provs=site.provinces.map(p=>`<a class="province" href="/${p.slug}/"><strong>${E(p.name)}</strong><span>${data.groups[p.slug].length} municipios</span></a>`).join(''),featured=site.provinces.map(p=>{const a=data.groups[p.slug];return`<article class="town-province"><div class="town-province-head"><h3>${E(p.name)}</h3><a href="/${p.slug}/">Ver todos</a></div>${townLinks(p,a)}</article>`}).join('');return`${head(title,desc,'/','España')}<body>${header()}<main>
 <section class="hero"><div class="wrap hero-grid"><div><span class="eyebrow">Canalones · Tejados · Bajantes · Goteras</span><h1>Limpieza de canalones y tejados cerca de tu pueblo</h1><p class="lead">Retirada de hojas y suciedad, desatasco de bajantes, reparación de canalones, sustitución puntual de tejas rotas, goteras e impermeabilización de remates para mantener cubierta y evacuación en buen estado.</p>${contact()}<div class="trustline"><span class="stars" aria-label="cinco estrellas decorativas">★★★★★</span><span>Atención clara · trabajo ordenado · servicio local</span></div></div><div class="hero-art"><img src="https://images.pexels.com/photos/38867780/pexels-photo-38867780.jpeg?auto=compress&cs=tinysrgb&w=1200" alt="Operario realizando limpieza de tejado con agua a presión" width="620" height="430" loading="eager" fetchpriority="high"></div></div></section>
 <div class="strip"><div class="wrap"><span>Limpieza de hojas y barro</span><span>Desatasco de bajantes</span><span>Tejas y goteras</span><span>Impermeabilización y remates</span></div></div>
 <section class="section wrap" id="servicios"><span class="eyebrow">Servicios</span><h2>Canalones, bajantes y pequeñas reparaciones de tejado</h2><p class="lead2">No todos los problemas se resuelven cambiando piezas. Primero conviene distinguir entre suciedad, bajante obstruida, unión deteriorada, teja rota, gotera o un encuentro de cubierta que necesita sellado o impermeabilización.</p>${cards()}</section>
