@@ -33,3 +33,20 @@ if(finder){
     }catch{if(own===sequence)status.textContent='El buscador no está disponible ahora. Puedes abrir los listados por provincia que aparecen debajo.'}},180);
   });
 }
+
+const consentKey='lcyt-cookie-consent-v1';
+const cookieBanner=document.querySelector('[data-cookie-banner]');
+const cookieDialog=document.querySelector('[data-cookie-dialog]');
+const readConsent=()=>{try{return JSON.parse(localStorage.getItem(consentKey)||'null')}catch{return null}};
+const saveConsent=analytics=>{try{localStorage.setItem(consentKey,JSON.stringify({necessary:true,analytics:Boolean(analytics),updatedAt:new Date().toISOString()}))}catch{};if(cookieBanner)cookieBanner.hidden=true;if(cookieDialog?.open)cookieDialog.close();};
+const currentConsent=readConsent();
+if(cookieBanner&&!currentConsent)cookieBanner.hidden=false;
+document.querySelectorAll('[data-cookie-accept],[data-cookie-all]').forEach(btn=>btn.addEventListener('click',()=>saveConsent(true)));
+document.querySelectorAll('[data-cookie-reject]').forEach(btn=>btn.addEventListener('click',()=>saveConsent(false)));
+document.querySelectorAll('[data-cookie-save]').forEach(btn=>btn.addEventListener('click',()=>saveConsent(Boolean(document.querySelector('[data-cookie-analytics]')?.checked))));
+document.querySelectorAll('[data-cookie-open]').forEach(btn=>btn.addEventListener('click',()=>{
+  const consent=readConsent();
+  const analytics=document.querySelector('[data-cookie-analytics]');
+  if(analytics)analytics.checked=Boolean(consent?.analytics);
+  if(cookieDialog?.showModal)cookieDialog.showModal();
+}));
