@@ -12,3 +12,11 @@ html{scroll-padding-top:20px}body{padding-bottom:0}body:has(.mobilebar){padding-
 .contact-panel .actions{grid-column:1/-1;margin-top:0}
 @media(max-width:820px){.contact-panel{grid-template-columns:1fr;padding:26px}.contact-panel .actions{grid-column:auto}}
 @media(max-width:520px){.contact-panel{padding:20px}}
+
+.brand-wordmark{display:grid;grid-template-columns:1fr;gap:0;line-height:1;text-decoration:none;min-width:250px}
+.brand-wordmark .brand-kicker{display:block;font-size:10px;font-weight:900;letter-spacing:.24em;color:var(--copper);margin-bottom:4px}
+.brand-wordmark .brand-main{display:block;font-size:clamp(20px,2vw,28px);font-weight:950;letter-spacing:-.045em;color:#242628;white-space:nowrap}
+.brand-wordmark .brand-rule{display:block;width:86px;height:4px;margin:7px 0 6px;border-radius:999px;background:var(--copper);position:relative}
+.brand-wordmark .brand-rule:after{content:"";position:absolute;right:-2px;top:0;width:4px;height:10px;border-radius:0 0 3px 3px;background:var(--copper)}
+.brand-wordmark small{display:block;margin:0;color:var(--muted);font-size:10px;font-weight:800;letter-spacing:.02em}
+@media(max-width:520px){.brand-wordmark{min-width:0}.brand-wordmark .brand-main{font-size:20px;white-space:normal}.brand-wordmark small{font-size:9px}}
