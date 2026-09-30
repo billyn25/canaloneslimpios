@@ -1,4 +1,12 @@
 {
-  "name":"canaloneslimpios","version":"0.1.0","private":true,"type":"module",
-  "scripts":{"build":"node scripts/fetch-municipalities.mjs && node scripts/build.mjs && node scripts/audit.mjs","build:production":"BUILD_MODE=production node scripts/fetch-municipalities.mjs && BUILD_MODE=production node scripts/build.mjs && BUILD_MODE=production node scripts/audit.mjs"}
+  "name": "canaloneslimpios",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "engines": {"node": ">=22"},
+  "scripts": {
+    "build": "node scripts/build-all.mjs",
+    "build:production": "node scripts/build-all.mjs --production",
+    "test": "node --test tests/*.test.mjs"
+  }
 }

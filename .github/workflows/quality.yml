@@ -1,0 +1,42 @@
+name: Calidad de Canalones Limpios
+on:
+  push:
+    branches: [main, quality/canalones-refinement]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Pruebas unitarias
+        run: npm test
+      - name: Build y auditoría de vista previa
+        run: npm run build
+      - name: Guardar informe de vista previa
+        run: mkdir -p .quality && cp dist/quality-report.json .quality/preview.json
+      - name: Verificar aislamiento de deploy previews
+        env:
+          CONTEXT: deploy-preview
+          BUILD_MODE: production
+        run: npm run build:production
+      - name: Build y auditoría de producción con datos ficticios de prueba
+        env:
+          CONTEXT: production
+          SITE_DOMAIN: https://example.invalid
+          SITE_PHONE: '123 456 789'
+          SITE_TEL: '+34123456789'
+          SITE_WHATSAPP: '34123456789'
+        run: npm run build:production
+      - name: Guardar informe de producción
+        run: cp dist/quality-report.json .quality/production-test.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: quality-reports
+          path: .quality/
+          include-hidden-files: true
