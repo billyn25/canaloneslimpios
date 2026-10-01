@@ -1,0 +1,11 @@
+/* Homepage only: readable service + municipality, with the existing 12 / view-more split. */
+#pueblos .home-town-groups{align-items:start}
+#pueblos .town-province .home-town-links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+#pueblos .home-town-links .town-service-link{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;min-width:0;min-height:76px;padding:12px 10px;border-radius:10px;text-align:left;white-space:normal;background:#fff}
+#pueblos .town-service-link .town-service-label{display:block;font-size:12px;line-height:1.35;font-weight:500;color:var(--muted);overflow-wrap:break-word}
+#pueblos .town-service-link .town-service-name{display:block;font-size:15px;line-height:1.25;font-weight:800;color:var(--ink);overflow-wrap:anywhere}
+#pueblos .home-town-links .town-service-link:hover{background:var(--soft);border-color:var(--copper);text-decoration:none}
+#pueblos .home-town-links .town-service-link:focus-visible{outline:3px solid var(--copper);outline-offset:3px}
+#pueblos .more-town-links{max-height:none;overflow:visible;padding-right:0}
+#pueblos .more-towns summary{min-height:44px;line-height:1.5;padding:9px 0}
+@media(max-width:359px){#pueblos .town-province .home-town-links{grid-template-columns:1fr}#pueblos .home-town-links .town-service-link{min-height:66px}}

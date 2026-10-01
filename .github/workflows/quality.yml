@@ -1,7 +1,7 @@
 name: Calidad de Canalones Limpios
 on:
   push:
-    branches: [main, quality/canalones-refinement, quality/contact-visibility]
+    branches: [main, quality/canalones-refinement, quality/contact-visibility, quality/town-service-labels]
   workflow_dispatch:
 permissions:
   contents: read
@@ -45,6 +45,8 @@ jobs:
           python -m playwright install --with-deps chromium webkit
       - name: Comprobar urgencias y técnico en móvil y escritorio
         run: python tests/contact-visibility.browser.py
+      - name: Comprobar servicios y pueblos visibles y desplegados
+        run: python tests/home-town-links.browser.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
