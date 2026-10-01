@@ -1,14 +1,14 @@
 name: Calidad de Canalones Limpios
 on:
   push:
-    branches: [main, quality/canalones-refinement]
+    branches: [main, quality/canalones-refinement, quality/contact-visibility]
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
   quality:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -35,7 +35,18 @@ jobs:
         run: npm run build:production
       - name: Guardar informe de producción
         run: cp dist/quality-report.json .quality/production-test.json
+      - name: Producción con el teléfono y dominio configurados
+        env:
+          CONTEXT: production
+        run: npm run build && cp dist/contact-visibility-report.json .quality/contact-visibility.json
+      - name: Preparar navegadores de prueba
+        run: |
+          python -m pip install playwright==1.57.0
+          python -m playwright install --with-deps chromium webkit
+      - name: Comprobar urgencias y técnico en móvil y escritorio
+        run: python tests/contact-visibility.browser.py
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: quality-reports
           path: .quality/
