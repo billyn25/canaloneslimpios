@@ -1,0 +1,11 @@
+/* Postal information is HTML, including expanded codes; no inner scrolling. */
+.postal-code-list{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0}
+.postal-code{display:inline-block;padding:7px 12px;border:1px solid var(--line);border-radius:8px;background:var(--white);color:var(--roof);font-weight:800;letter-spacing:.025em}
+.postal-help,.postal-source{max-width:850px;color:var(--muted);line-height:1.6;font-size:14px}
+.postal-source{font-size:12px}.postal-source a{text-decoration:underline;text-underline-offset:2px}
+.postal-more summary{cursor:pointer;font-weight:700;padding:8px 0;color:var(--copper-dark)}
+.postal-directory .alpha a.postal-town-link{display:flex;flex-direction:column;gap:4px;border-radius:12px;padding:12px 14px;max-width:100%;overflow-wrap:anywhere}
+.postal-directory-codes{display:block;font-size:12px;font-weight:400;color:var(--muted);line-height:1.5}
+.postal-home-link{margin:0 0 16px;font-size:13px;font-weight:700;color:var(--copper-dark)}
+.postal-directory .town-finder{margin-bottom:18px}.postal-directory .town-results a{overflow-wrap:anywhere}
+@media(max-width:520px){.postal-coverage h2,.postal-directory h2{font-size:28px;overflow-wrap:anywhere}.postal-code{padding:6px 10px}.postal-help{font-size:13px}.postal-directory .alpha a.postal-town-link{width:100%}}

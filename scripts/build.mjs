@@ -46,6 +46,7 @@ const legalPage=(slug,title,body)=>`${head(`${title} | Limpieza Canalones y Teja
 
 const write=(route,html)=>{const d=route==='/'?out:path.join(out,route.replace(/^\//,'').replace(/\/$/,''));fs.mkdirSync(d,{recursive:true});fs.writeFileSync(path.join(d,'index.html'),html)};
 const featuredTownNames={
+  madrid:['Madrid','Alcalá de Henares','Móstoles','Alcorcón','Getafe','Leganés','Torrejón de Ardoz','Alcobendas','Colmenar Viejo','Aranjuez','San Lorenzo de El Escorial','Navalcarnero'],
   bizkaia:['Bilbao','Getxo','Barakaldo','Portugalete','Durango','Gernika-Lumo','Basauri','Leioa'],
   gipuzkoa:['Donostia/San Sebastián','Irun','Eibar','Zarautz','Tolosa','Hondarribia','Errenteria','Beasain'],
   alava:['Vitoria-Gasteiz','Laudio/Llodio','Amurrio','Laguardia','Agurain/Salvatierra','Alegría-Dulantzi'],
