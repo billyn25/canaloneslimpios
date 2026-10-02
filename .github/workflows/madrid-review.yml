@@ -1,0 +1,51 @@
+name: Revisar Madrid y codigos postales
+on:
+  push:
+    branches: [expand/madrid-postal]
+permissions:
+  contents: read
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Referencia de producción sin cambios
+        run: |
+          mkdir -p .quality
+          npm run build:production > .quality/baseline-build.log 2>&1
+          cp dist/quality-report.json .quality/baseline-report.json
+      - name: Leer fuente oficial de direcciones postales
+        run: |
+          python3 - <<'PY'
+          import urllib.request,urllib.parse,json,concurrent.futures
+          from pathlib import Path
+          urls={
+            'cnig.html':'https://centrodedescargas.cnig.es/CentroDescargas/cartociudad',
+            'queryables.json':'https://api-features.idee.es/collections/address/queryables?f=json',
+            'sample.json':'https://api-features.idee.es/collections/address/items?'+urllib.parse.urlencode({'f':'json','component_AdminUnitName_3':'Madrid','limit':2}),
+            'openapi.json':'https://api-features.idee.es/openapi?f=json',
+            'municipios-all.json':'https://raw.githubusercontent.com/codeforspain/ds-organizacion-administrativa/1e9c99280ef4d7a12def33cafc3df59d9fc1f688/data/municipios.json'
+          }
+          def get(item):
+            name,url=item
+            try:
+              req=urllib.request.Request(url,headers={'User-Agent':'Mozilla/5.0'})
+              with urllib.request.urlopen(req,timeout=45) as r: data=r.read()
+              Path('.quality/'+name).write_bytes(data)
+              print(name,len(data),flush=True)
+            except Exception as e: print(name,str(e),flush=True)
+          with concurrent.futures.ThreadPoolExecutor(max_workers=3) as p:list(p.map(get,urls.items()))
+          PY
+      - name: Guardar fuente y referencia para comprobación local
+        if: always()
+        run: tar --exclude=.git --exclude=.quality --exclude=node_modules -czf .quality/repository.tar.gz .
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: madrid-review
+          path: .quality/
+          include-hidden-files: true
