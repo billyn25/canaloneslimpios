@@ -8,7 +8,7 @@ if(!response.ok) throw new Error(`Municipios: HTTP ${response.status}`);
 const all=await response.json();
 const groups={};
 for(const p of site.provinces){
-  const items=all.filter(x=>x.provincia_id===p.id).map(x=>({id:x.municipio_id,name:x.nombre.replaceAll('\\/','/')})).sort((a,b)=>a.name.localeCompare(b.name,'es',{sensitivity:'base'}));
+  const items=all.filter(x=>x.provincia_id===p.id).map(x=>({id:x.municipio_id,name:x.provincia_id==='28'?x.nombre.replaceAll('\\/','/').replace(/^(.+),\s*(El|La|Los|Las)$/, '$2 $1'):x.nombre.replaceAll('\\/','/')})).sort((a,b)=>a.name.localeCompare(b.name,'es',{sensitivity:'base'}));
   if(!items.length) throw new Error(`Sin municipios para ${p.name}`);
   groups[p.slug]=items;
 }

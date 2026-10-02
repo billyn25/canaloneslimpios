@@ -72,6 +72,11 @@
       "id": "40",
       "name": "Segovia",
       "slug": "segovia"
+    },
+    {
+      "id": "28",
+      "name": "Madrid",
+      "slug": "madrid"
     }
   ],
   "productionDomain": "https://limpiezacanalonesytejados.com",
