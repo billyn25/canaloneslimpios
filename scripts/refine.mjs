@@ -59,7 +59,7 @@ export function refine(html,ctx){
   const canonical=new URL(ctx.route,ctx.domain).href;
   let title=decode(output.match(/<title>([\s\S]*?)<\/title>/)?.[1]||'');
   let description=decode(output.match(/<meta name="description" content="([^"]+)"/)?.[1]||'');
-  if(ctx.town){title=`Limpieza de canalones y tejados en ${ctx.town.name} | ${ctx.phone||'641 58 93 94'}`;description=`Limpieza de canalones y tejados en ${ctx.town.name}, ${ctx.province.name}. Bajantes, goteras, tejas rotas, impermeabilización y urgencias 24 h. Tel. ${ctx.phone||'641 58 93 94'}.`;}
+  if(ctx.town){title=`Limpieza de canalones y tejados en ${ctx.town.name}, ${ctx.province.name} | ${ctx.phone||'641 58 93 94'}`;description=`Limpieza de canalones y tejados en ${ctx.town.name}, ${ctx.province.name}. Bajantes, goteras, tejas rotas, impermeabilización y urgencias 24 h. Tel. ${ctx.phone||'641 58 93 94'}.`;}
   else if(isHome){title=`Limpieza de canalones y tejados | ${ctx.phone||'641 58 93 94'}`;description=`Limpieza de canalones y tejados, bajantes, tejas rotas, goteras y remates de chimeneas. Urgencias 24 h · ${ctx.phone||'641 58 93 94'}. Consulta tu pueblo y prepara el aviso.`;}
   else if(isServiceHub){title=`${serviceHubMap[ctx.route]} | ${ctx.phone||'641 58 93 94'}`;description=`${serviceHubMap[ctx.route]} y mantenimiento de cubiertas. Información del servicio, zonas de actuación y contacto: ${ctx.phone||'641 58 93 94'}.`;}
   else if(ctx.province){title=`Servicio de canalones y tejados en la provincia de ${ctx.province.name} | ${ctx.phone||'641 58 93 94'}`;description=`Servicio de canalones y tejados en la provincia de ${ctx.province.name}: limpieza, bajantes, goteras, tejas rotas, impermeabilización y mantenimiento. Tel. ${ctx.phone||'641 58 93 94'}.`;}
