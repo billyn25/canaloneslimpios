@@ -36,6 +36,8 @@ try:
                     labels = shown.locator('.town-service-label').all_text_contents()
                     assert labels.count('Limpieza de canalones en') == expected['canalones']
                     assert labels.count('Limpieza de tejados en') == expected['tejados']
+                    assert labels.count('Limpieza de canalones y tejados en') == expected['canalonesYTejados']
+                    assert labels.count('Limpieza de tejados y canalones en') == expected['tejadosYCanalones']
                     assert group.locator('.more-town-links a').count() == expected['more']
                     assert not group.locator('.more-towns').get_attribute('open')
                     for anchor in shown.all():
@@ -61,12 +63,25 @@ try:
                 if width == 1440:
                     first.scroll_into_view_if_needed()
                     page.screenshot(path=str(out / f'{engine}-escritorio.png'))
-                results.append({'engine':engine, 'width':width, 'groups':groups.count(), 'passed':True, 'javascript':False})
+                # Every province, not only Madrid: labels match the home and postal data stays visible.
+                group_count = groups.count()
+                for province in json.loads(Path('config/site.json').read_text())['provinces']:
+                    assert page.goto(origin + '/' + province['slug'] + '/', wait_until='load').status == 200
+                    links = page.locator('.alpha .town-service-link')
+                    expected = next(r for r in report['rows'] if r['province'] == province['name'])
+                    assert links.count() == expected['visible'] + expected['more']
+                    assert links.evaluate_all('els => els.every(e => e.scrollWidth <= e.clientWidth + 1)'), 'Texto provincial desbordado'
+                    assert page.evaluate('document.documentElement.scrollWidth <= window.innerWidth + 1'), 'Scroll horizontal provincial'
+                    assert all(links.locator('.town-service-name').all_text_contents())
+                    if width == 390 and province['slug'] in ['burgos', 'madrid']:
+                        page.locator('.alpha-group').first.scroll_into_view_if_needed()
+                        page.screenshot(path=str(out / f'{engine}-directorio-{province["slug"]}.png'))
+                results.append({'engine':engine, 'width':width, 'groups':group_count, 'directories':report['provinces'], 'passed':True, 'javascript':False})
                 context.close()
             browser.close()
     (out / 'browser.json').write_text(json.dumps({'passed':True,'results':results},ensure_ascii=False,indent=2),encoding='utf8')
     (out / 'directory.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf8')
-    print(f'PUEBLOS UI OK: {len(results)} escenarios; 12 visibles, reparto 8/4, todos los municipios en HTML, sin scroll interno.')
+    print(f'PUEBLOS UI OK: {len(results)} escenarios; 12 visibles, cuatro variantes (3/3/3/3), todos los municipios en HTML, sin scroll interno.')
 finally:
     server.shutdown()
     server.server_close()
