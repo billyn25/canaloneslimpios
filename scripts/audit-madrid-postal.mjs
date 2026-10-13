@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import {madridDistricts} from '../content/madrid-districts.mjs';
 import path from 'node:path';
 import assert from 'node:assert/strict';
 import {getTowns, escape} from './refine.mjs';
@@ -27,14 +28,14 @@ for(const town of towns){
   assert.ok(!/"(?:streetAddress|postalCode)"\s*:/.test(html),'Códigos de cobertura no son sedes de empresa');
   assert.ok(html.includes(`content="${manifest.mode==='production'?'index,follow':'noindex,nofollow'}"`));
 }
-const home=fs.readFileSync(root+'/index.html','utf8');assert.ok(home.includes('href="/madrid/#localidades"'));
+assert.ok(directory.includes('id="distritos-madrid"'));assert.ok(directory.indexOf('id="distritos-madrid"')<directory.indexOf('id="localidades"'));for(const d of madridDistricts)assert.ok(directory.includes(`href="${d.path}"`),d.slug);const home=fs.readFileSync(root+'/index.html','utf8');assert.ok(home.includes('href="/madrid/#localidades"'));
 assert.ok(home.includes('Los códigos postales están disponibles para Madrid'));
 if(manifest.mode==='production'){
  const domain=process.env.SITE_DOMAIN||site.productionDomain;
  const xml=fs.readFileSync(root+'/sitemaps/sitemap-madrid.xml','utf8');
  const urls=[...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m=>m[1]);
- assert.equal(urls.length,180);assert.equal(new Set(urls).size,180);
- for(const route of ['/madrid/',...locals.map(t=>t.path)])assert.ok(urls.includes(new URL(route,domain).href));
+ assert.equal(urls.length,201);assert.equal(new Set(urls).size,201);
+ for(const route of ['/madrid/',...locals.map(t=>t.path),...madridDistricts.map(d=>d.path)])assert.ok(urls.includes(new URL(route,domain).href));
  assert.ok(fs.readFileSync(root+'/sitemap.xml','utf8').includes('/sitemaps/sitemap-madrid.xml'));
 }
-console.log('AUDITORÍA MADRID OK: 179 municipios; 395 relaciones postales; buscador en portada y Madrid; 2760 municipios en 15 provincias.');
+console.log('AUDITORÍA MADRID OK: 179 municipios + 21 distritos; 395 relaciones postales; buscador en portada y Madrid; 2760 municipios en 15 provincias.');
