@@ -1,3 +1,4 @@
+import {madridDistricts} from '../content/madrid-districts.mjs';
 import fs from'node:fs';import path from'node:path';import site from'../config/site.json'with{type:'json'};
 const prod=process.env.BUILD_MODE==='production',root='dist',errors=[],legalRoutes=['aviso-legal/index.html','privacidad/index.html','cookies/index.html'],serviceRoutes=['limpieza-canalones/index.html','limpieza-tejados/index.html','desatasco-bajantes/index.html','reparacion-goteras/index.html','impermeabilizacion-tejados/index.html'],walk=d=>fs.readdirSync(d,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(path.join(d,e.name)):[path.join(d,e.name)]);
 if(!fs.existsSync(root))throw Error('AUDIT: falta dist');
