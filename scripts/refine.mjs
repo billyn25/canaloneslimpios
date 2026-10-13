@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import {madridDistricts} from '../content/madrid-districts.mjs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
@@ -99,7 +100,7 @@ async function main(){
   if(!/^https?:\/\//.test(domain||''))throw Error('Dominio de generación inválido');
   for(const file of ['refinement.css','site.js'])fs.copyFileSync('src/'+file,root+'/assets/'+file);
   const walk=d=>fs.readdirSync(d,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(path.join(d,e.name)):[path.join(d,e.name)]);
-  const lookup=new Map(towns.map(t=>[t.path,t]));let count=0;
+  const districts=madridDistricts.map(d=>({...d,province:'Madrid',provinceSlug:'madrid',district:true}));const lookup=new Map([...towns,...districts].map(t=>[t.path,t]));let count=0;
   for(const file of walk(root).filter(f=>f.endsWith('.html'))){const rel=path.relative(root,file).split(path.sep).join('/'),route=rel==='index.html'?'/':rel==='404.html'?'/404.html':'/'+rel.replace(/index\.html$/,'');const town=lookup.get(route),province=site.provinces.find(p=>route.startsWith('/'+p.slug+'/'));fs.writeFileSync(file,refine(fs.readFileSync(file,'utf8'),{route,town,province,towns,provinces:site.provinces,domain,prod,phone,tel,wa}));count++;}
   fs.writeFileSync(root+'/assets/towns.json',JSON.stringify(towns.map(({name,province,path})=>({name,province,path}))));
   fs.writeFileSync(root+'/media-sources.json',JSON.stringify(media,null,2));
