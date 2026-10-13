@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import {madridDistricts} from '../content/madrid-districts.mjs';
 import path from 'node:path';
 import {getTowns,serviceNames,slug} from './refine.mjs';
 const root='dist',site=JSON.parse(fs.readFileSync('config/site.json','utf8')),data=JSON.parse(fs.readFileSync('.cache/municipios.json','utf8')),manifest=JSON.parse(fs.readFileSync(root+'/manifest.json','utf8'));
@@ -6,13 +7,13 @@ const expectedPhone=process.env.SITE_PHONE||site.phone;
 const towns=getTowns(site,data),prod=process.env.BUILD_MODE==='production',domain=prod?(process.env.SITE_DOMAIN||site.productionDomain):site.previewDomain,errors=[];
 const expect=(condition,message)=>{if(!condition)errors.push(message)};
 const decode=s=>String(s).replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&');
-const legalRoutes=['/aviso-legal/','/privacidad/','/cookies/'],serviceRoutes=['/limpieza-canalones/','/limpieza-tejados/','/desatasco-bajantes/','/reparacion-goteras/','/impermeabilizacion-tejados/'];const routes=['/',...serviceRoutes,...legalRoutes,...site.provinces.map(p=>`/${p.slug}/`),...towns.map(t=>t.path)];
+const legalRoutes=['/aviso-legal/','/privacidad/','/cookies/'],serviceRoutes=['/limpieza-canalones/','/limpieza-tejados/','/desatasco-bajantes/','/reparacion-goteras/','/impermeabilizacion-tejados/'],districtRoutes=madridDistricts.map(d=>d.path);const routes=['/',...serviceRoutes,...legalRoutes,...site.provinces.map(p=>`/${p.slug}/`),...towns.map(t=>t.path),...districtRoutes];
 const fileFor=route=>route==='/'?'index.html':route.endsWith('/')?route.slice(1)+'index.html':route.slice(1);
 const walk=d=>fs.readdirSync(d,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(path.join(d,e.name)):[path.join(d,e.name)]);
 const html=new Map(walk(root).filter(f=>f.endsWith('.html')).map(f=>[path.relative(root,f).split(path.sep).join('/'),fs.readFileSync(f,'utf8')]));
 expect(new Set(routes).size===routes.length,'Rutas repetidas en el dataset');
 expect(manifest.towns===towns.length,'Manifiesto: municipios no coinciden con dataset');
-expect(manifest.provinces===site.provinces.length,'Manifiesto: provincias no coinciden con configuración');
+expect(manifest.provinces===site.provinces.length,'Manifiesto: provincias no coinciden con configuración');expect(manifest.districts===madridDistricts.length,'Manifiesto: distritos Madrid no coinciden');
 expect(manifest.urls===routes.length,'Manifiesto: URLs no coinciden con rutas esperadas');
 expect(manifest.mode===(prod?'production':'preview'),'Modo de publicación incoherente');
 expect(html.size===routes.length+1,'Número de HTML incorrecto, incluyendo 404');
@@ -28,7 +29,7 @@ for(const route of [...routes,'/404.html']){
   expect(Boolean(title&&desc&&canonical),file+': metadatos incompletos');expect(canonical===new URL(route,domain).href,file+': canonical incorrecto');
   if(!is404){for(const [seen,value,key]of [[titles,title,'title'],[metas,desc,'description'],[canonicals,canonical,'canonical']]){expect(!seen.has(value),file+': '+key+' duplicado');seen.add(value)}}
   for(const [key,value]of [['title',title],['description',desc],['url',canonical]])expect(decode(h.match(new RegExp(`<meta property="og:${key}" content="([^"]*)"`))?.[1]||'')===value,file+': Open Graph incoherente '+key);
-  try{const data=JSON.parse(h.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)?.[1]||'');const graph=data['@graph'];expect(Array.isArray(graph),file+': falta grafo');const page=graph.find(x=>['WebPage','CollectionPage'].includes(x['@type']));expect(page?.url===canonical&&page?.description===desc,file+': datos estructurados no coinciden');expect(!/aggregateRating|reviewCount|ratingValue/.test(JSON.stringify(data)),file+': valoración no acreditada');if(route!=='/'&&!is404&&!isLegal){const crumb=graph.find(x=>x['@type']==='BreadcrumbList');const expected=isService?['/',route]:['/',...route.split('/').filter(Boolean).map((_,i,a)=>'/'+a.slice(0,i+1).join('/')+'/')];expect(crumb?.itemListElement.length===expected.length&&crumb.itemListElement.every((v,i)=>v.item===new URL(expected[i],domain).href&&v.position===i+1),file+': breadcrumbs incorrectos');breadcrumbs++}}
+  try{const data=JSON.parse(h.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)?.[1]||'');const graph=data['@graph'];expect(Array.isArray(graph),file+': falta grafo');const page=graph.find(x=>['WebPage','CollectionPage'].includes(x['@type']));expect(page?.url===canonical&&page?.description===desc,file+': datos estructurados no coinciden');expect(!/aggregateRating|reviewCount|ratingValue/.test(JSON.stringify(data)),file+': valoración no acreditada');if(route!=='/'&&!is404&&!isLegal){const crumb=graph.find(x=>x['@type']==='BreadcrumbList');const expected=isService?['/',route]:districtRoutes.includes(route)?['/','/madrid/',route]:['/',...route.split('/').filter(Boolean).map((_,i,a)=>'/'+a.slice(0,i+1).join('/')+'/')];expect(crumb?.itemListElement.length===expected.length&&crumb.itemListElement.every((v,i)=>v.item===new URL(expected[i],domain).href&&v.position===i+1),file+': breadcrumbs incorrectos');breadcrumbs++}}
   catch(error){errors.push(file+': JSON-LD inválido '+error.message)}
   for(const m of h.matchAll(/href="([^"]+)"/g)){const href=decode(m[1]);if(!href.startsWith('/')&&!href.startsWith('#'))continue;const url=new URL(href,canonical);if(url.origin!==new URL(domain).origin)continue;const target=fileFor(url.pathname);expect(fs.existsSync(path.join(root,target)),file+': enlace inexistente '+href);if(url.hash&&html.has(target))expect(html.get(target).includes(`id="${decodeURIComponent(url.hash.slice(1))}"`),file+': ancla inexistente '+href);links++;}
   for(const m of h.matchAll(/(?:src|href)="(\/assets\/[^"?#]+)/g))expect(fs.existsSync(path.join(root,m[1].slice(1))),file+': recurso ausente '+m[1]);
