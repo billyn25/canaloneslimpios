@@ -1,3 +1,4 @@
+import {localDescription,localFollowup,homeProblemGallery,localProfile,localPhotos} from './local-experience.mjs';
 import fs from 'node:fs';
 import {madridDistricts} from '../content/madrid-districts.mjs';
 import path from 'node:path';
@@ -54,19 +55,20 @@ export function refine(html,ctx){
   if(html.includes('data-refined="1"'))throw Error('La fase de presentación ya se ha aplicado');
   const serviceHubMap={'/limpieza-canalones/':'Limpieza de canalones','/limpieza-tejados/':'Limpieza de tejados','/desatasco-bajantes/':'Desatasco de bajantes','/reparacion-goteras/':'Reparación de goteras','/impermeabilizacion-tejados/':'Impermeabilización de tejados'};const isHome=ctx.route==='/',is404=ctx.route==='/404.html',isLegal=['/aviso-legal/','/privacidad/','/cookies/'].includes(ctx.route),isServiceHub=Boolean(serviceHubMap[ctx.route]);
   let output=html.replace('<html lang="es">','<html lang="es" data-refined="1">').replaceAll('\\n<section','\n<section');
-  output=output.replace('</head>','<link rel="stylesheet" href="/assets/refinement.css"></head>');
+  output=output.replace('</head>','<link rel="stylesheet" href="/assets/refinement.css"><link rel="stylesheet" href="/assets/local-experience.css"></head>');
   output=output.replace('<body>','<body><a class="skip-link" href="#contenido">Saltar al contenido</a>').replace('<main','<main id="contenido"');
   output=output.replace('<nav class="nav">','<nav class="nav" aria-label="Navegación principal"><a href="/#pueblos">Pueblos</a>');
   const canonical=new URL(ctx.route,ctx.domain).href;
   let title=decode(output.match(/<title>([\s\S]*?)<\/title>/)?.[1]||'');
   let description=decode(output.match(/<meta name="description" content="([^"]+)"/)?.[1]||'');
-  if(ctx.town){title=`Limpieza de canalones y tejados en ${ctx.town.name}, ${ctx.province.name} | ${ctx.phone||'641 58 93 94'}`;description=`Limpieza de canalones y tejados en ${ctx.town.name}, ${ctx.province.name}. Bajantes, goteras, tejas rotas, impermeabilización y urgencias 24 h. Tel. ${ctx.phone||'641 58 93 94'}.`;}
+  if(ctx.town){title=`Limpieza de canalones y tejados en ${ctx.town.name}, ${ctx.province.name} | ${ctx.phone||'641 58 93 94'}`;description=localDescription(ctx.town,ctx.province);}
   else if(isHome){title=`Limpieza de canalones y tejados | ${ctx.phone||'641 58 93 94'}`;description=`Limpieza de canalones y tejados, bajantes, tejas rotas, goteras y remates de chimeneas. Urgencias 24 h · ${ctx.phone||'641 58 93 94'}. Consulta tu pueblo y prepara el aviso.`;}
   else if(isServiceHub){title=`${serviceHubMap[ctx.route]} | ${ctx.phone||'641 58 93 94'}`;description=`${serviceHubMap[ctx.route]} y mantenimiento de cubiertas. Información del servicio, zonas de actuación y contacto: ${ctx.phone||'641 58 93 94'}.`;}
   else if(ctx.province){title=`Servicio de canalones y tejados en la provincia de ${ctx.province.name} | ${ctx.phone||'641 58 93 94'}`;description=`Servicio de canalones y tejados en la provincia de ${ctx.province.name}: limpieza, bajantes, goteras, tejas rotas, impermeabilización y mantenimiento. Tel. ${ctx.phone||'641 58 93 94'}.`;}
   output=output.replace(/<title>[\s\S]*?<\/title>/,`<title>${escape(title)}</title>`).replace(/<meta name="description" content="[^"]*">/,`<meta name="description" content="${escape(description)}">`).replace(/<link rel="canonical" href="[^"]+">/,`<link rel="canonical" href="${escape(canonical)}">`).replace(/<meta name="robots" content="[^"]+">/,`<meta name="robots" content="${ctx.prod&&!is404?'index,follow':'noindex,nofollow'}">`);
   for(const [key,value] of [['title',title],['description',description],['url',canonical]])output=output.replace(new RegExp(`<meta property="og:${key}" content="[^"]*">`),`<meta property="og:${key}" content="${escape(value)}">`);
-  output=output.replace('</head>',`<meta property="og:type" content="website"><meta property="og:locale" content="es_ES"><meta property="og:image" content="${escape(remoteImage(media[0],1200))}"><meta name="twitter:card" content="summary_large_image"></head>`);
+  const sharePhoto=ctx.town?new URL('/assets/photos/'+localProfile(ctx.town,ctx.province).primaryPhoto+'.webp',ctx.domain).href:remoteImage(media[0],1200);
+  output=output.replace('</head>',`<meta property="og:type" content="website"><meta property="og:locale" content="es_ES"><meta property="og:image" content="${escape(sharePhoto)}"><meta name="twitter:card" content="summary_large_image"></head>`);
   const organization={'@type':'Organization','@id':new URL('/#organizacion',ctx.domain).href,name:'Limpieza Canalones y Tejados',url:new URL('/',ctx.domain).href};
   const graph=[organization,{'@type':'WebSite','@id':new URL('/#web',ctx.domain).href,url:new URL('/',ctx.domain).href,name:'Limpieza Canalones y Tejados',inLanguage:'es'},{'@type':ctx.province&&!ctx.town?'CollectionPage':'WebPage','@id':canonical+'#pagina',url:canonical,name:title,description,inLanguage:'es',isPartOf:{'@id':new URL('/#web',ctx.domain).href}}];
   if(!isHome&&!is404&&!isLegal){const parts=[{name:'Inicio',item:new URL('/',ctx.domain).href}];if(isServiceHub)parts.push({name:serviceHubMap[ctx.route],item:canonical});else{parts.push({name:ctx.province.name,item:new URL('/'+ctx.province.slug+'/',ctx.domain).href});if(ctx.town)parts.push({name:ctx.town.name,item:canonical});}graph.push({'@type':'BreadcrumbList',itemListElement:parts.map((x,i)=>({'@type':'ListItem',position:i+1,...x}))});}
@@ -83,12 +85,12 @@ export function refine(html,ctx){
     output=output.replace(/<div class="hero-art"><img[^>]+><\/div>/,`<figure class="hero-art">${image(media[0],true)}<figcaption>Fotografía de referencia · ${escape(media[0].author)} / Pexels</figcaption></figure>`);
     const galleryPattern=/<section class="section visual-section">[\s\S]*?<\/section>/;
     if(!galleryPattern.test(output))throw Error('No se encuentra la galería inicial');
-    output=output.replace(galleryPattern,gallery());
+    output=output.replace(galleryPattern,homeProblemGallery()+gallery());
     output=output.replace('<div class="home-town-groups">',townFinder()+'<div class="home-town-groups">');
     output=output.replace('<section class="section wrap" id="contacto">',properties()+includedWork()+budget(ctx)+finalSummary(ctx)+'<section class="section wrap" id="contacto">');
     output=output.replace(/(<div class="home-town-links">)([\s\S]*?)(<\/div>)/g,(_,a,links,b)=>a+links.replace(/>Limpieza de canalones en /g,'>')+b);
     output=output.replace('<h2>Canalones, bajantes y pequeñas reparaciones de tejado</h2>','<h2>Canalones, bajantes y pequeñas reparaciones de tejado</h2><nav class="service-jumps" aria-label="Ir a un servicio"><a href="#servicio-limpieza-de-canalones">Canalones</a><a href="#servicio-limpieza-de-tejados">Tejados</a><a href="#servicio-desatasco-de-bajantes">Bajantes</a><a href="#servicio-reparacion-de-goteras">Goteras</a><a href="#servicio-revision-de-chimeneas">Chimeneas</a></nav>');
-  }else if(ctx.town)output=output.replace('<section class="section wrap" id="contacto">',urgentLocal(ctx)+includedWork()+budget(ctx)+'<section class="section wrap" id="contacto">');
+  }else if(ctx.town)output=output.replace('<section class="section wrap" id="contacto">',localFollowup(ctx)+'<section class="section wrap" id="contacto">');
   output=output.replace('aria-label="cinco estrellas decorativas"','aria-hidden="true"');
   return output;
 }
@@ -103,7 +105,7 @@ async function main(){
   const districts=madridDistricts.map(d=>({...d,province:'Madrid',provinceSlug:'madrid',district:true}));const lookup=new Map([...towns,...districts].map(t=>[t.path,t]));let count=0;
   for(const file of walk(root).filter(f=>f.endsWith('.html'))){const rel=path.relative(root,file).split(path.sep).join('/'),route=rel==='index.html'?'/':rel==='404.html'?'/404.html':'/'+rel.replace(/index\.html$/,'');const town=lookup.get(route),province=site.provinces.find(p=>route.startsWith('/'+p.slug+'/'));fs.writeFileSync(file,refine(fs.readFileSync(file,'utf8'),{route,town,province,towns,provinces:site.provinces,domain,prod,phone,tel,wa}));count++;}
   fs.writeFileSync(root+'/assets/towns.json',JSON.stringify(towns.map(({name,province,path})=>({name,province,path}))));
-  fs.writeFileSync(root+'/media-sources.json',JSON.stringify(media,null,2));
+  fs.writeFileSync(root+'/media-sources.json',JSON.stringify([...media,...Object.entries(localPhotos).map(([id,p])=>({id,source:'/assets/photos/'+id+'.webp',type:'AI-generated illustrative image',alt:p.alt,documentation:'docs/photo-assets.md'}))],null,2));
   // Crawling must be allowed for crawlers to read the preview noindex directives.
   fs.writeFileSync(root+'/robots.txt',prod?`User-agent: *\nAllow: /\n\nSitemap: ${new URL('/sitemap.xml',domain).href}\n`:'User-agent: *\nAllow: /\n');
   fs.writeFileSync(root+'/_headers',(prod?'/404.html\n  X-Robots-Tag: noindex, nofollow\n':'/*\n  X-Robots-Tag: noindex, nofollow\n'));
