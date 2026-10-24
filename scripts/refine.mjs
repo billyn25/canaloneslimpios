@@ -58,6 +58,7 @@ export function refine(html,ctx){
   output=output.replace('</head>','<link rel="stylesheet" href="/assets/refinement.css"><link rel="stylesheet" href="/assets/local-experience.css"></head>');
   output=output.replace('<body>','<body><a class="skip-link" href="#contenido">Saltar al contenido</a>').replace('<main','<main id="contenido"');
   output=output.replace('<nav class="nav">','<nav class="nav" aria-label="Navegación principal"><a href="/#pueblos">Pueblos</a>');
+  output=output.replace('<nav class="nav" aria-label="Navegación principal">','<button class="nav-toggle" type="button" aria-expanded="false" aria-controls="main-navigation" hidden><span aria-hidden="true">☰</span> Menú</button><nav id="main-navigation" class="nav" aria-label="Navegación principal">');
   const canonical=new URL(ctx.route,ctx.domain).href;
   let title=decode(output.match(/<title>([\s\S]*?)<\/title>/)?.[1]||'');
   let description=decode(output.match(/<meta name="description" content="([^"]+)"/)?.[1]||'');

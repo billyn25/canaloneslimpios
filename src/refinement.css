@@ -82,3 +82,17 @@ html{scroll-padding-top:20px}body{padding-bottom:0}body:has(.mobilebar){padding-
   .hero h1{font-size:29px}
   .mobilebar a{font-size:14px}
 }
+
+/* Accessible mobile navigation; desktop links stay visible. */
+.nav-toggle{display:none}
+@media(max-width:820px){
+  .head.nav-ready{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;padding:14px 0;gap:12px 8px}
+  .head.nav-ready>a{flex:1;min-width:0}
+  .nav-ready .nav-toggle{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:44px;padding:9px 12px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink);font-size:13px;font-weight:800}
+  .nav-toggle[aria-expanded="true"]{background:var(--soft);border-color:var(--copper)}
+  .nav-ready .nav{display:none;width:100%;margin:0;border-top:1px solid var(--line);padding-top:10px;grid-template-columns:1fr 1fr;gap:8px}
+  .nav-ready .nav-toggle[aria-expanded="true"]+.nav{display:grid}
+  .nav-ready .nav a{justify-content:flex-start;padding:10px 14px;border-radius:8px;background:var(--soft);font-size:14px;min-height:44px}
+  .nav-ready .brand-wordmark .brand-main{font-size:clamp(16px,4.1vw,24px)}
+  .nav-ready .brand-wordmark small{font-size:8px}
+}

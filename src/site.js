@@ -50,3 +50,19 @@ document.querySelectorAll('[data-cookie-open]').forEach(btn=>btn.addEventListene
   if(analytics)analytics.checked=Boolean(consent?.analytics);
   if(cookieDialog?.showModal)cookieDialog.showModal();
 }));
+
+// Progressive enhancement: navigation remains available if scripts cannot load.
+const navToggle=document.querySelector('.nav-toggle');
+const mainNavigation=document.getElementById('main-navigation');
+if(navToggle&&mainNavigation){
+  const header=navToggle.closest('.head');
+  const mobileNavigation=window.matchMedia('(max-width:820px)');
+  const closeNavigation=()=>navToggle.setAttribute('aria-expanded','false');
+  navToggle.hidden=false;
+  header.classList.add('nav-ready');
+  navToggle.addEventListener('click',()=>navToggle.setAttribute('aria-expanded',String(navToggle.getAttribute('aria-expanded')!=='true')));
+  mainNavigation.addEventListener('click',event=>{if(event.target.closest('a'))closeNavigation()});
+  document.addEventListener('click',event=>{if(!header.contains(event.target))closeNavigation()});
+  document.addEventListener('keydown',event=>{if(event.key==='Escape'&&navToggle.getAttribute('aria-expanded')==='true'){closeNavigation();navToggle.focus()}});
+  mobileNavigation.addEventListener('change',closeNavigation);
+}
