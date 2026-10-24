@@ -58,7 +58,7 @@
 }
 .trustline .direct-tech-label { font-weight: 800; color: var(--ink); }
 @media (max-width: 520px) {
-  .top.emergency-bar > .wrap { gap: 0 10px; min-height: 48px; }
+  .top.emergency-bar > .wrap { gap: 0 10px; min-height: 44px; padding-top: 0; padding-bottom: 0; }
   .top.emergency-bar .emergency-label { font-size: 13px; gap: 6px; }
   .top.emergency-bar .emergency-phone { font-size: 18px; padding: 0 2px; }
   #contacto .contact-copy .direct-tech { font-size: 15px; }
