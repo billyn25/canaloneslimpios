@@ -24,7 +24,7 @@ for(const town of towns){
   assert.equal((html.match(/id="codigos-postales"/g)||[]).length,1);
   assert.ok(directory.includes(`data-municipio-id="${town.id}" data-postal-codes="${postal.postalCodes.join(' ')}"`));
   assert.ok(html.includes(`value="${escape(town.name)}"`),'El formulario debe conservar el pueblo');
-  assert.ok(html.includes(`Limpieza de tejados y canalones en ${escape(town.name)}`),'Se pierde la variante local');
+  for(const service of ['canalones','tejados'])assert.ok(html.includes(`<h2>Limpieza de ${service} en ${escape(town.name)}</h2>`),'Se pierde el servicio local de '+service);
   assert.ok(!/"(?:streetAddress|postalCode)"\s*:/.test(html),'Códigos de cobertura no son sedes de empresa');
   assert.ok(html.includes(`content="${manifest.mode==='production'?'index,follow':'noindex,nofollow'}"`));
 }

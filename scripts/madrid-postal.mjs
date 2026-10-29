@@ -28,7 +28,7 @@ export function enrichMadridTown(html, town, row, data) {
   if (town.provinceSlug !== 'madrid') return html;
   assert.equal(town.id, row.id, 'La asignación postal no corresponde al municipio');
   assert.ok(!html.includes('id="codigos-postales"'), 'Bloque postal ya insertado');
-  const marker = `<section class="section wrap"><h2>Preguntas frecuentes sobre canalones en ${esc(town.name)}</h2>`;
+  const marker = '<section class="section wrap" id="preguntas-frecuentes">';
   assert.equal(html.split(marker).length, 2, `${town.path}: falta punto de inserción postal`);
   return addStyle(html.replace(marker, postalBlock(town, row, data) + marker));
 }

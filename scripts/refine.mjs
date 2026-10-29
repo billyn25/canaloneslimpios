@@ -1,4 +1,4 @@
-import {localDescription,localFollowup,homeProblemGallery,localProfile,localPhotos} from './local-experience.mjs';
+import {localTitle,localDescription,localFollowup,homeProblemGallery,localProfile,localPhotos} from './local-experience.mjs';
 import fs from 'node:fs';
 import {madridDistricts} from '../content/madrid-districts.mjs';
 import path from 'node:path';
@@ -62,10 +62,10 @@ export function refine(html,ctx){
   const canonical=new URL(ctx.route,ctx.domain).href;
   let title=decode(output.match(/<title>([\s\S]*?)<\/title>/)?.[1]||'');
   let description=decode(output.match(/<meta name="description" content="([^"]+)"/)?.[1]||'');
-  if(ctx.town){title=`Limpieza de canalones y tejados en ${ctx.town.name}, ${ctx.province.name} | ${ctx.phone||'641 58 93 94'}`;description=localDescription(ctx.town,ctx.province);}
+  if(ctx.town){title=localTitle(ctx.town,ctx.province);description=localDescription(ctx.town,ctx.province);}
   else if(isHome){title=`Limpieza de canalones y tejados | ${ctx.phone||'641 58 93 94'}`;description=`Limpieza de canalones y tejados, bajantes, tejas rotas, goteras y remates de chimeneas. Urgencias 24 h · ${ctx.phone||'641 58 93 94'}. Consulta tu pueblo y prepara el aviso.`;}
-  else if(isServiceHub){title=`${serviceHubMap[ctx.route]} | ${ctx.phone||'641 58 93 94'}`;description=`${serviceHubMap[ctx.route]} y mantenimiento de cubiertas. Información del servicio, zonas de actuación y contacto: ${ctx.phone||'641 58 93 94'}.`;}
-  else if(ctx.province){title=`Servicio de canalones y tejados en la provincia de ${ctx.province.name} | ${ctx.phone||'641 58 93 94'}`;description=`Servicio de canalones y tejados en la provincia de ${ctx.province.name}: limpieza, bajantes, goteras, tejas rotas, impermeabilización y mantenimiento. Tel. ${ctx.phone||'641 58 93 94'}.`;}
+  else if(isServiceHub){title=`${serviceHubMap[ctx.route]} | Canalones y Tejados`;}
+  else if(ctx.province){title=`Limpieza de canalones y tejados en ${ctx.province.name} | Municipios`;description=`Limpieza de canalones y tejados en ${ctx.province.name}. Consulta tu municipio para retirar hojas, barro o musgo, revisar bajantes y valorar el acceso.`;}
   output=output.replace(/<title>[\s\S]*?<\/title>/,`<title>${escape(title)}</title>`).replace(/<meta name="description" content="[^"]*">/,`<meta name="description" content="${escape(description)}">`).replace(/<link rel="canonical" href="[^"]+">/,`<link rel="canonical" href="${escape(canonical)}">`).replace(/<meta name="robots" content="[^"]+">/,`<meta name="robots" content="${ctx.prod&&!is404?'index,follow':'noindex,nofollow'}">`);
   for(const [key,value] of [['title',title],['description',description],['url',canonical]])output=output.replace(new RegExp(`<meta property="og:${key}" content="[^"]*">`),`<meta property="og:${key}" content="${escape(value)}">`);
   const sharePhoto=ctx.town?new URL('/assets/photos/'+localProfile(ctx.town,ctx.province).primaryPhoto+'.webp',ctx.domain).href:remoteImage(media[0],1200);
@@ -73,7 +73,7 @@ export function refine(html,ctx){
   const organization={'@type':'Organization','@id':new URL('/#organizacion',ctx.domain).href,name:'Limpieza Canalones y Tejados',url:new URL('/',ctx.domain).href};
   const graph=[organization,{'@type':'WebSite','@id':new URL('/#web',ctx.domain).href,url:new URL('/',ctx.domain).href,name:'Limpieza Canalones y Tejados',inLanguage:'es'},{'@type':ctx.province&&!ctx.town?'CollectionPage':'WebPage','@id':canonical+'#pagina',url:canonical,name:title,description,inLanguage:'es',isPartOf:{'@id':new URL('/#web',ctx.domain).href}}];
   if(!isHome&&!is404&&!isLegal){const parts=[{name:'Inicio',item:new URL('/',ctx.domain).href}];if(isServiceHub)parts.push({name:serviceHubMap[ctx.route],item:canonical});else{parts.push({name:ctx.province.name,item:new URL('/'+ctx.province.slug+'/',ctx.domain).href});if(ctx.town)parts.push({name:ctx.town.name,item:canonical});}graph.push({'@type':'BreadcrumbList',itemListElement:parts.map((x,i)=>({'@type':'ListItem',position:i+1,...x}))});}
-  if(!is404&&!isLegal)graph.push({'@type':'Service',name:'Limpieza de canalones y mantenimiento de tejados',serviceType:serviceNames,provider:{'@id':organization['@id']},areaServed:ctx.province?{'@type':ctx.town?'Place':'AdministrativeArea',name:ctx.town?`${ctx.town.name}, ${ctx.province.name}`:ctx.province.name}:ctx.provinces.map(p=>({'@type':'AdministrativeArea',name:p.name}))});
+  if(!is404&&!isLegal)graph.push({'@type':'Service',name:isServiceHub?serviceHubMap[ctx.route]:'Limpieza de canalones y tejados',serviceType:isServiceHub?[serviceHubMap[ctx.route]]:serviceNames,provider:{'@id':organization['@id']},areaServed:ctx.province?{'@type':ctx.town?'Place':'AdministrativeArea',name:ctx.town?`${ctx.town.name}, ${ctx.province.name}`:ctx.province.name}:ctx.provinces.map(p=>({'@type':'AdministrativeArea',name:p.name}))});
   output=output.replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/,`<script type="application/ld+json">${JSON.stringify({'@context':'https://schema.org','@graph':graph}).replaceAll('<','\\u003c')}</script>`);
   output=output.replace(/<div class="mobilebar">/g,'<div class="mobilebar" data-nosnippet>');
   if(is404||isLegal)return output;

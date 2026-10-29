@@ -28,31 +28,43 @@ export function localProfile(t,p){
   const guides=[gutter,roof,extra];
   const primaryPhoto=gutter.photo==='leaking-joint'?'leaking-joint':'leaves-gutter';
   const intro=[
-    `¿El agua rebosa por el alero o aparece una mancha en el techo? Consulta limpieza de canalones, bajantes y revisión de goteras en ${t.name}. Explica dónde ocurre para orientar la visita.`,
-    `Para limpiar o reparar canalones en ${t.name}, primero diferenciamos la suciedad que frena el agua de una fuga o una filtración de cubierta. Aquí tienes síntomas que ayudan a preparar la consulta.`,
-    `Hojas acumuladas, uniones que gotean y humedad interior requieren comprobaciones distintas. Solicita servicio de canalones y tejados en ${t.name} indicando el problema que observas.`,
-    `La revisión del canalón y del tejado en ${t.name} empieza por el recorrido del agua: dónde se retiene, por dónde sale y cuándo aparece la humedad. Puedes enviar fotos desde un lugar seguro.`,
-    `Si buscas mantenimiento de canalones en ${t.name}, indica el acceso y los antecedentes de atasco. Si ya existe una gotera, conviene valorar también cubierta, encuentros y remates.`,
-    `Un canalón aparentemente limpio puede seguir evacuando mal. Consulta desatasco, limpieza y reparación en ${t.name}, con una valoración del síntoma antes de decidir qué piezas intervenir.`,
-    `Para una vivienda, una comunidad o un local en ${t.name}, el alcance depende del acceso y de la avería. Revisa estos ejemplos de obstrucciones y goteras para explicar mejor tu aviso.`,
-    `¿El problema vuelve después de limpiar o sellar? En la consulta de canalones y tejados en ${t.name} interesa conocer qué se hizo antes y si el agua aparece siempre en el mismo punto.`
+    `Limpieza de canalones y tejados en ${t.name}: retirada de hojas y barro de la evacuación, y limpieza de musgo o suciedad de la cubierta según su estado. Indica qué zona necesita atención para valorar el acceso.`,
+    `Consulta limpieza de canalones y de tejados en ${t.name}, por separado o en una misma visita. Valoramos los residuos, el material y el acceso antes de concretar el trabajo.`,
+    `Hojas en el canalón y musgo sobre las tejas requieren actuaciones distintas. Solicita limpieza de canalones o de tejados en ${t.name} con una valoración del alcance y de la conservación de la cubierta.`,
+    `La limpieza de canalones y tejados en ${t.name} atiende tanto la suciedad de la cubierta como la evacuación del agua. Puedes enviar fotos desde un lugar seguro para preparar el presupuesto.`,
+    `Para el mantenimiento de tu inmueble en ${t.name}, puedes consultar limpieza de canalones, retirada de residuos del tejado o ambos servicios. Si existe una gotera, también se valora su origen.`,
+    `Limpieza de tejados y canalones en ${t.name}, adaptada al material y al acceso. Diferenciamos la suciedad de las piezas deterioradas para concretar si hace falta limpiar, reparar o combinar ambos trabajos.`,
+    `Consulta limpieza de tejados y canalones para viviendas, comunidades o locales en ${t.name}. El presupuesto tiene en cuenta la superficie de cubierta, el recorrido del canalón y los medios de acceso.`,
+    `Si necesitas limpieza de canalones y tejados en ${t.name}, indica cuándo se limpiaron y qué suciedad observas. Los antecedentes de reboses o filtraciones ayudan a preparar la revisión.`
   ][hash(key+':intro')%8];
   return {key,gutter,roof,extra,guides,property,material,primaryPhoto,intro};
 }
 
+export function localTitle(t,p){
+  const where=t.name===p.name?t.name:`${t.name}, ${p.name}`;
+  return `Limpieza de canalones y tejados en ${where}`;
+}
+
 export function localDescription(t,p){
-  const {gutter,roof}=localProfile(t,p);
-  return `Limpieza de canalones y tejados en ${t.name}, ${p.name}. ${gutter.title}. ${roof.title}. Consulta limpieza, revisión o reparación.`;
+  return `${localTitle(t,p)}. Retirada de hojas, barro y musgo. Presupuesto según cubierta, altura y acceso.`;
 }
 
 function guideArticle(g,index){
   return `<article class="diagnosis-card" id="caso-${E(g.id)}"><span class="case-number">0${index+1} · ${g.category==='roof'?'Cubierta y goteras':'Canalones y bajantes'}</span><h3>${E(g.title)}</h3><p class="case-summary">${E(g.summary)}</p><p>${E(g.diagnosis)}</p><h4>Qué conviene comprobar</h4><ul>${g.checks.map(c=>`<li>${E(c)}</li>`).join('')}</ul><p class="case-action">${E(g.action)}</p></article>`;
 }
 
+function cleaningServices(profile,t){
+  const services=[
+    {name:'Limpieza de canalones',label:'Evacuación del agua',href:'/limpieza-canalones/',checks:['Retirada de hojas, barro y residuos de los tramos accesibles.','Atención a embocaduras y puntos donde se acumula suciedad.','Comprobación del paso del agua y de posibles obstrucciones en la bajante.'],scope:'Si hay fugas, fijaciones sueltas o tramos deformados, se explica la reparación necesaria y se presupuesta por separado.'},
+    {name:'Limpieza de tejados',label:'Conservación de la cubierta',href:'/limpieza-tejados/',checks:['Valoración del musgo, las hojas y la suciedad sobre la cubierta.','Elección del método según el material, su conservación y el acceso.','Retirada controlada de residuos para evitar que obstruyan canalones y salidas.'],scope:'La limpieza no sustituye la reparación de tejas rotas ni la impermeabilización. Esos trabajos se valoran según el estado encontrado.'}
+  ];
+  return `<section class="section wrap" id="limpiezas-locales" aria-label="Servicios de limpieza"><div class="primary-cleaning-grid">${services.map(s=>{const detail=serviceDetails.find(d=>d.name===s.name);return `<article class="primary-cleaning-card" id="servicio-${slug(s.name)}"><span class="eyebrow">${E(s.label)}</span><h2>${E(s.name)} en ${E(t.name)}</h2><p>${E(choose(detail.variants,profile.key+':service:'+s.name))}</p><ul>${s.checks.map(c=>`<li>${E(c)}</li>`).join('')}</ul><p class="cleaning-scope">${E(s.scope)}</p><a class="text-link" href="${s.href}">Qué incluye la ${E(s.name.toLowerCase())} →</a></article>`}).join('')}</div></section>`;
+}
+
 function serviceCards(profile,t){
-  const priorities=profile.primaryPhoto==='leaking-joint'?['Reparación de canalones','Revisión del sistema de evacuación','Reparación de goteras']:['Limpieza de canalones','Desatasco de bajantes','Reparación de goteras'];
+  const priorities=profile.primaryPhoto==='leaking-joint'?['Reparación de canalones','Revisión del sistema de evacuación','Reparación de goteras']:['Desatasco de bajantes','Reparación de canalones','Reparación de goteras'];
   const rank=s=>priorities.includes(s.name)?priorities.indexOf(s.name):-1;
-  const order=[...serviceDetails].sort((a,b)=>{const ar=rank(a),br=rank(b);if(ar>=0||br>=0)return (ar<0?99:ar)-(br<0?99:br);return hash(profile.key+':order:'+a.name)-hash(profile.key+':order:'+b.name)});
+  const order=serviceDetails.filter(s=>!['Limpieza de canalones','Limpieza de tejados'].includes(s.name)).sort((a,b)=>{const ar=rank(a),br=rank(b);if(ar>=0||br>=0)return (ar<0?99:ar)-(br<0?99:br);return hash(profile.key+':order:'+a.name)-hash(profile.key+':order:'+b.name)});
   const hub={'Limpieza de canalones':'/limpieza-canalones/','Limpieza de tejados':'/limpieza-tejados/','Desatasco de bajantes':'/desatasco-bajantes/','Reparación de goteras':'/reparacion-goteras/','Impermeabilización':'/impermeabilizacion-tejados/'};
   return `<div class="services local-services">${order.map(s=>`<article class="card" id="servicio-${slug(s.name)}"><h3>${E(s.name)} en ${E(t.name)}</h3><p>${E(choose(s.variants,profile.key+':service:'+s.name))}</p><a class="service-link" href="${hub[s.name]||'#contacto'}">${hub[s.name]?'Ver en qué consiste →':'Consultar este servicio →'}</a></article>`).join('')}</div>`;
 }
@@ -69,14 +81,15 @@ export function localMain(t,p,{contact,related,district=false}){
     'Retirar hojas ayuda cuando obstruyen el paso del agua. Si la humedad continúa con la evacuación despejada, conviene comprobar tejas y remates en lugar de repetir una limpieza sin revisar la causa.',
     'La conservación de la cubierta y el funcionamiento de las bajantes se valoran por separado. El lugar de la mancha, la intensidad de la lluvia y los antecedentes aportan pistas para delimitar el trabajo.'
   ][hash(q.key+':roofIntro')%4];
-  const faq=[...q.guides.map(g=>({question:g.question,answer:g.answer})),q.property];
+  const faq=[{question:'¿Puedo pedir solo limpieza del tejado o también de los canalones?',answer:'Puedes solicitar cada servicio por separado o pedir que se valoren juntos. Limpiar el tejado y retirar los residuos del canalón tienen alcances distintos; el presupuesto debe indicar qué superficies y tramos se incluyen, el acceso necesario y cualquier reparación adicional.'},...q.guides.map(g=>({question:g.question,answer:g.answer})),q.property];
   return `<div class="wrap crumbs"><a href="/">Inicio</a> → <a href="/${p.slug}/">${E(p.name)}</a> → ${where}</div>
-<section class="local-hero local-photo-hero" data-local-profile="${E(q.guides.map(g=>g.id).join(','))}"><div class="wrap local-hero-grid"><div><span class="eyebrow">${district?'Madrid capital · Distrito de':'Servicio en'} ${where}</span><h1>Limpieza de canalones en ${where}</h1><p class="lead2">${E(q.intro)}</p>${contact}${districtNote}<div class="trustline local"><span class="stars" aria-hidden="true">★★★★★</span><span>Trato directo con el técnico profesional.</span></div><nav class="local-jumps" aria-label="Consultar el problema"><a href="#diagnostico">Qué puede estar pasando</a><a href="#servicios-locales">Servicios</a><a href="#contacto">Pedir presupuesto</a></nav></div>${localPhoto(q.primaryPhoto,true)}</div></section>
+<section class="local-hero local-photo-hero" data-local-profile="${E(q.guides.map(g=>g.id).join(','))}"><div class="wrap local-hero-grid"><div><span class="eyebrow">${district?'Madrid capital · Distrito de':'Servicio en'} ${where}</span><h1>Limpieza de canalones y tejados en ${where}</h1><p class="lead2">${E(q.intro)}</p>${contact}${districtNote}<div class="trustline local"><span class="stars" aria-hidden="true">★★★★★</span><span>Trato directo con el técnico profesional.</span></div><nav class="local-jumps" aria-label="Servicios y consulta"><a href="#servicio-limpieza-de-canalones">Limpieza de canalones</a><a href="#servicio-limpieza-de-tejados">Limpieza de tejados</a><a href="#diagnostico">Síntomas y revisión</a><a href="#contacto">Pedir presupuesto</a></nav></div>${localPhoto(q.primaryPhoto,true)}</div></section>
+${cleaningServices(q,t)}
 <section class="section wrap" id="diagnostico"><span class="eyebrow">Síntomas y comprobaciones</span><h2>Antes de limpiar o reparar en ${where}</h2><p class="lead2">Estos supuestos ayudan a describir el aviso. La causa y el alcance se confirman al revisar el inmueble.</p><div class="diagnosis-grid">${q.guides.map(guideArticle).join('')}</div></section>
-<section class="section soft"><div class="wrap"><div class="local-roof-intro"><span class="eyebrow">Del canalón al techo interior</span><h2>Limpieza de tejados y canalones en ${where}</h2><p class="lead2">${E(roofIntro)}</p></div><div class="problem-photo-grid${photoGrid}">${otherPhotos.map(id=>localPhoto(id)).join('')}<div class="material-note"><span class="eyebrow">Material y conservación</span><h3>${E(q.material.title)}</h3><p>${E(q.material.text)}</p><a class="text-link" href="/reparacion-goteras/">Cómo se revisa una gotera →</a></div></div></div></section>
-<section class="section wrap" id="servicios-locales"><span class="eyebrow">Limpieza, revisión y reparación</span><h2>Servicios de canalones y tejados en ${where}</h2>${serviceCards(q,t)}</section>
+<section class="section soft"><div class="wrap"><div class="local-roof-intro"><span class="eyebrow">Del canalón al techo interior</span><h2>Cómo distinguir un atasco de una filtración</h2><p class="lead2">${E(roofIntro)}</p></div><div class="problem-photo-grid${photoGrid}">${otherPhotos.map(id=>localPhoto(id)).join('')}<div class="material-note"><span class="eyebrow">Material y conservación</span><h3>${E(q.material.title)}</h3><p>${E(q.material.text)}</p><a class="text-link" href="/reparacion-goteras/">Cómo se revisa una gotera →</a></div></div></div></section>
+<section class="section wrap" id="servicios-locales"><span class="eyebrow">Revisión, reparación y mantenimiento</span><h2>Otros servicios de bajantes y cubiertas en ${where}</h2>${serviceCards(q,t)}</section>
 <section class="section soft" id="mantenimiento-local"><div class="wrap maintenance-grid"><div><span class="eyebrow">Preparar la visita</span><h2>${E(q.property.title)}</h2><p>${E(q.property.text)}</p></div><div class="maintenance-note"><h3>Después de la intervención</h3><p>${E(q.gutter.prevention)}</p><p>${E(q.roof.prevention)}</p></div></div></section>
-<section class="section wrap"><h2>Preguntas frecuentes sobre canalones en ${where}</h2><div class="faq">${faq.map(f=>`<details><summary>${E(f.question)}</summary><p>${E(f.answer)}</p></details>`).join('')}</div></section>
+<section class="section wrap" id="preguntas-frecuentes"><h2>Preguntas frecuentes sobre canalones y tejados en ${where}</h2><div class="faq">${faq.map(f=>`<details><summary>${E(f.question)}</summary><p>${E(f.answer)}</p></details>`).join('')}</div></section>
 <section class="section soft"><div class="wrap"><h2>${district?'Otros distritos de Madrid capital':'Otros municipios de '+E(p.name)}</h2><div class="towns">${related}</div><p><a href="/${p.slug}/"><strong>Ver ${district?'Madrid y sus municipios':'todos los municipios de '+E(p.name)} →</strong></a></p></div></section>
 <section class="section wrap" id="contacto"><h2>Consulta limpieza o reparación en ${where}</h2>${contact}</section>`;
 }
