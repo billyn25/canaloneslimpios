@@ -65,7 +65,8 @@ function cleanFooter(footer){
  for(const old of [...oldValues,CENTRAL.phone,CENTRAL.tel,CENTRAL.wa,'614789945'])clean=clean.replaceAll(old,'');
  clean=clean.replace(/<div>\s*<strong>Contacto<\/strong>\s*<p>\s*<\/p>\s*<\/div>/g,'')
   .replace(/Contacto y legal/g,'Información legal').replace(/<p(?:\s+class="[^"]*")?>\s*<\/p>/g,'');
- return clean.replace(/(<footer\b[^>]*>)/i,'$1'+panel());
+ const slot='<!-- regional-contact-slot -->';
+ return clean.includes(slot)?clean.replace(slot,panel()):clean.replace(/(<footer\b[^>]*>)/i,'$1'+panel());
 }
 function addProvinceChoice(html){
  if(!SETTINGS.formProvinces)return html;
