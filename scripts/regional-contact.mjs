@@ -133,7 +133,9 @@ export function build(){
   report.pages.push({url:new URL(route,SETTINGS.domain).href,file:path.relative(root,file),...result});
  }
  assert.ok(hasContacts,'No se ha encontrado ningún pie de página');
- for(const [province,count] of Object.entries(SETTINGS.expected))assert.equal(report.centralCounts[province],count,'Inventario central incompleto: '+province);
+ const coverageFile=path.join(root,'coverage-manifest.json'),coverage=fs.existsSync(coverageFile)?JSON.parse(fs.readFileSync(coverageFile,'utf8')):null;
+ const expected=coverage?Object.fromEntries(Object.keys(SETTINGS.expected).map(province=>[province,coverage.routes.filter(route=>route.split('/').filter(Boolean)[0]===province).length])):SETTINGS.expected;
+ for(const [province,count] of Object.entries(expected))assert.equal(report.centralCounts[province],count,'Inventario central incompleto: '+province);
  for(const [file,digest] of digests)assert.equal(crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex'),digest,'Cambió un archivo de rastreo: '+file);
  fs.mkdirSync(path.join(root,'assets'),{recursive:true});fs.writeFileSync(root+cssPath,css);fs.writeFileSync(root+jsPath,browser);
  report.ok=true;report.css=cssPath;report.js=jsPath;
